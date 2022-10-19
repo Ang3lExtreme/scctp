@@ -4,9 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
-import scc.Controllers.ControlResource;
-import scc.Controllers.MediaResource;
-import scc.Controllers.UserController;
+import scc.Controllers.*;
 
 public class MainApplication extends Application
 {
@@ -17,6 +15,9 @@ public class MainApplication extends Application
 		resources.add(ControlResource.class);
 		resources.add(MediaResource.class);
 		resources.add(UserController.class);
+		resources.add(BidController.class);
+		resources.add(QuestionController.class);
+		resources.add(AuctionController.class);
 		singletons.add( new MediaResource());
 
 	}
