@@ -7,10 +7,13 @@ public class Bid {
     private float value;
 
     public Bid(String auctionId, String userId, float value) {
+        super();
         this.auctionId = auctionId;
         this.userId = userId;
         this.value = value;
     }
+
+    public Bid(){}
 
     public String getAuctionId() {
         return auctionId;

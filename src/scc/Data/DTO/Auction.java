@@ -12,6 +12,7 @@ public class Auction {
     private Status status = Status.OPEN;
 
     public Auction(String auctionId, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
+        super();
         this.auctionId = auctionId;
         this.title = title;
         this.description = description;
@@ -19,6 +20,10 @@ public class Auction {
         this.ownerId = ownerId;
         this.endTime = endTime;
         this.minPrice = minPrice;
+
+    }
+
+    public Auction(){
 
     }
 

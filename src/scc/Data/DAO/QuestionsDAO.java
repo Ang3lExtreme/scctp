@@ -1,5 +1,7 @@
 package scc.Data.DAO;
 
+import scc.Data.DTO.Questions;
+
 public class QuestionsDAO {
     private String _rid;
     private String _ts;
@@ -7,12 +9,19 @@ public class QuestionsDAO {
     private String userId;
     private String message;
 
-    public QuestionsDAO(String _rid, String _ts, String auctionId, String userId, String message) {
-        this._rid = _rid;
-        this._ts = _ts;
+    public QuestionsDAO(String auctionId, String userId, String message) {
+        super();
         this.auctionId = auctionId;
         this.userId = userId;
         this.message = message;
+    }
+    //constructor that takes in a DTO
+    public QuestionsDAO(){
+
+    }
+
+    public QuestionsDAO(Questions q){
+        this(q.getAuctionId(), q.getUserId(), q.getMessage());
     }
 
     public String get_rid() {

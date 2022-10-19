@@ -7,10 +7,13 @@ private String auctionId;
     private String message;
 
     public Questions(String auctionId, String userId, String message) {
+        super();
         this.auctionId = auctionId;
         this.userId = userId;
         this.message = message;
     }
+
+    public Questions(){}
 
     public String getAuctionId() {
         return auctionId;

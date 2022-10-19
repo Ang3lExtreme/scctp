@@ -1,5 +1,7 @@
 package scc.Data.DAO;
 
+import scc.Data.DTO.Bid;
+
 public class BidDAO {
     private String _rid;
     private String _ts;
@@ -7,12 +9,17 @@ public class BidDAO {
     private String userId;
     private float value;
 
-    public BidDAO(String _rid, String _ts, String auctionId, String userId, float value) {
-        this._rid = _rid;
-        this._ts = _ts;
+    public BidDAO( String auctionId, String userId, float value) {
+        super();
         this.auctionId = auctionId;
         this.userId = userId;
         this.value = value;
+    }
+
+    public BidDAO(){}
+
+    public BidDAO(Bid b){
+        this(b.getAuctionId(), b.getUserId(), b.getValue());
     }
 
     public String get_rid() {

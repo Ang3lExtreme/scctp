@@ -23,6 +23,7 @@ public class AuctionDAO {
         this(a.getAuctionId(), a.getTitle(), a.getDescription(),a.getImageId(), a.getOwnerId(), a.getEndTime(), a.getMinPrice());
     }
     public AuctionDAO(String auctionId, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
+        super();
         this.auctionId = auctionId;
         this.title = title;
         this.description = description;
@@ -44,6 +45,7 @@ public class AuctionDAO {
         this.winnerId = winnerId;
         this.status = status;
     }
+
     public String getAuctionId() {
         return auctionId;
     }

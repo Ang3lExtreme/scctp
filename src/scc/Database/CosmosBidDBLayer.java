@@ -52,10 +52,9 @@ public class CosmosBidDBLayer {
         return bids.createItem(bid);
     }
 
-    public CosmosPagedIterable<BidDAO> getBids() {
+    public CosmosPagedIterable<BidDAO> getBids(String id) {
         init();
-        return bids.queryItems("SELECT * FROM bids", new CosmosQueryRequestOptions(), BidDAO.class);
-
+        return bids.queryItems("SELECT * FROM bids b WHERE b.auctionId = '" + id + "'", new CosmosQueryRequestOptions(), BidDAO.class);
     }
     public void close() {
         client.close();

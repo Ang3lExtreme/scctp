@@ -14,9 +14,9 @@ public class CosmosQuestionsDBLayer {
     private static final String DB_NAME = "";
 
 
-    private static CosmosBidDBLayer instance;
+    private static CosmosQuestionsDBLayer instance;
 
-    public static synchronized CosmosBidDBLayer getInstance() {
+    public static synchronized CosmosQuestionsDBLayer getInstance() {
         if( instance != null)
             return instance;
 
@@ -30,7 +30,7 @@ public class CosmosQuestionsDBLayer {
                 .connectionSharingAcrossClientsEnabled(true)
                 .contentResponseOnWriteEnabled(true)
                 .buildClient();
-        instance = new CosmosBidDBLayer( client);
+        instance = new CosmosQuestionsDBLayer( client);
         return instance;
 
     }
@@ -54,10 +54,9 @@ public class CosmosQuestionsDBLayer {
         return bids.createItem(question);
     }
 
-    public CosmosPagedIterable<QuestionsDAO> getQuestions() {
+    public CosmosPagedIterable<QuestionsDAO> getQuestions(String auctionId) {
         init();
-        return bids.queryItems("SELECT * FROM questions", new CosmosQueryRequestOptions(), QuestionsDAO.class);
-
+        return bids.queryItems("SELECT * FROM questions q WHERE q.auctionId = '" + auctionId + "'", new CosmosQueryRequestOptions(), QuestionsDAO.class);
     }
     public void close() {
         client.close();

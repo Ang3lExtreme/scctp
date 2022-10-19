@@ -1,7 +1,5 @@
 package scc.Controllers;
 
-
-
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.models.CosmosItemResponse;
