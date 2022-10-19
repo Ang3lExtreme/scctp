@@ -14,14 +14,25 @@ public class AuctionDAO {
     private String ownerId;
     private String endTime;
     private float minPrice;
-    private String winnerId;
-    private Status status;
+    private String winnerId = null;
+    private Status status = Status.OPEN;
 
     public AuctionDAO() {
     }
     public AuctionDAO( Auction a) {
-        this(a.getAuctionId(), a.getTitle(), a.getDescription(),a.getImageId(), a.getOwnerId(), a.getEndTime(), a.getMinPrice(), a.getWinnerId(), a.getStatus());
+        this(a.getAuctionId(), a.getTitle(), a.getDescription(),a.getImageId(), a.getOwnerId(), a.getEndTime(), a.getMinPrice());
     }
+    public AuctionDAO(String auctionId, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
+        this.auctionId = auctionId;
+        this.title = title;
+        this.description = description;
+        this.imageId = imageId;
+        this.ownerId = ownerId;
+        this.endTime = endTime;
+        this.minPrice = minPrice;
+
+    }
+    //constroctor including winnerId and status
     public AuctionDAO(String auctionId, String title, String description, String imageId, String ownerId, String endTime, float minPrice, String winnerId, Status status) {
         this.auctionId = auctionId;
         this.title = title;

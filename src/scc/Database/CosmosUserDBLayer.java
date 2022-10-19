@@ -16,7 +16,6 @@ public class CosmosUserDBLayer {
     private static final String CONNECTION_URL = "https://scc51162.documents.azure.com:443/";
     private static final String DB_KEY = "oGgO8ROa9AhuIjtiosedfGKBjUZzHQ351Jv9TKVP3HFv5iqnyPC8SV2OiWE1aZggOwhA9Qo67oCgECTspO7OPg==";
     private static final String DB_NAME = "scc51162db";
-
     private static CosmosUserDBLayer instance;
 
     public static synchronized CosmosUserDBLayer getInstance() {
