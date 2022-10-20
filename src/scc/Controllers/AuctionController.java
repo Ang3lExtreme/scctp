@@ -12,8 +12,8 @@ import scc.Database.CosmosAuctionDBLayer;
 
 @Path("/rest/auction")
 public class AuctionController {
-    private static final String CONNECTION_URL = "";
-    private static final String DB_KEY = "";
+    private static final String CONNECTION_URL = System.getenv("COSMOS_URL");
+    private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     //create controller to create and update auctions
     CosmosClient cosmosClient = new CosmosClientBuilder()
             .endpoint(CONNECTION_URL)

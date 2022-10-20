@@ -1,0 +1,7 @@
+# Date : 20/10/22, 21:13
+BlobStoreConnection=DefaultEndpointsProtocol=https;AccountName=sccstwesteuropetp1;AccountKey=JS/GaIC8UQJmA16rxdisRY7WFN/DtrTFMt/GWi4CIGEmHAIUcv3csiqdzh0Ay+Obuk/yiX/9AaTv+AStKlJ+Fg==;EndpointSuffix=core.windows.net
+COSMOSDB_KEY=qnyK2K398XbIkjIDoxbe8AJXpf36Pe3yAssxkZeMF3QMTrGO5sXgpT80kDcuGHgu6hxMAcNzvxX2LtLnqmY9eQ==
+COSMOSDB_URL=https://scc23tp1.documents.azure.com:443/
+COSMOSDB_DATABASE=scc23dbtp1
+REDIS_KEY=bvnXQjBCN7Uf7EcAJv1fUTfAmJjNXieN0AzCaFHCC6w=
+REDIS_URL=rediswesteuropetp1.redis.cache.windows.net

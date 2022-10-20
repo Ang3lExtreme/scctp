@@ -9,9 +9,9 @@ import scc.Data.DAO.QuestionsDAO;
 //same as CosmosBidDBLayer
 public class CosmosQuestionsDBLayer {
 
-    private static final String CONNECTION_URL = "";
-    private static final String DB_KEY = "";
-    private static final String DB_NAME = "";
+    private static final String CONNECTION_URL = System.getenv("COSMOS_URL");
+    private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
+    private static final String DB_NAME = System.getenv("COSMOS_DATABASE");
 
 
     private static CosmosQuestionsDBLayer instance;

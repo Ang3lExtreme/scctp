@@ -15,9 +15,8 @@ import java.security.NoSuchAlgorithmException;
 
 @Path("/rest/user")
 public class UserController {
-    private static final String CONNECTION_URL = "https://scc51162.documents.azure.com:443/";
-    private static final String DB_KEY = "oGgO8ROa9AhuIjtiosedfGKBjUZzHQ351Jv9TKVP3HFv5iqnyPC8SV2OiWE1aZggOwhA9Qo67oCgECTspO7OPg==";
-    private static final String DB_NAME = "scc51162db";
+    private static final String CONNECTION_URL = System.getenv("COSMOS_URL");
+    private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     private static final String HASHCODE = "SHA-256";
 
     CosmosClient cosmosClient = new CosmosClientBuilder()

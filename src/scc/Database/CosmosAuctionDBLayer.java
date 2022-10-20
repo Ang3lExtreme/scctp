@@ -7,9 +7,9 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import scc.Data.DAO.AuctionDAO;
 
 public class CosmosAuctionDBLayer {
-    private static final String CONNECTION_URL = "";
-    private static final String DB_KEY = "";
-    private static final String DB_NAME = "";
+    private static final String CONNECTION_URL = System.getenv("COSMOS_URL");
+    private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
+    private static final String DB_NAME = System.getenv("COSMOS_DATABASE");
     //create database layer to create and update auctions
 
 

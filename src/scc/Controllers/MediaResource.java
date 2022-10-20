@@ -22,36 +22,64 @@ import jakarta.ws.rs.core.MediaType;
 public class MediaResource
 {
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
-	String storageConnectionString = "";
-	BlobContainerClient containerClient = new BlobContainerClientBuilder()
+	String storageConnectionString = System.getenv("BlobStoreConnection");
+	BlobContainerClient containerClientImages = new BlobContainerClientBuilder()
                 .connectionString(storageConnectionString)
                 .containerName("images")
                 .buildClient();
+
+	BlobContainerClient containerClientVideos = new BlobContainerClientBuilder()
+			.connectionString(storageConnectionString)
+			.containerName("images")
+			.buildClient();
 	BlobClient blob;
 
 
 	@POST
-	@Path("/")
+	@Path("/images")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response.Status Upload(byte[] data){
+	public Response.Status UploadImages(byte[] data){
 		String filename = Hash.of(data);
-		blob = containerClient.getBlobClient(filename);
+		blob = containerClientImages.getBlobClient(filename);
 		blob.upload(BinaryData.fromBytes(data));
 		return Response.Status.ACCEPTED;
 		//devolver string
 	}
 
 	@GET
-	@Path("/{id}")
+	@Path("/images/{id}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public byte[] Download(@PathParam("id") String filename){
-		blob = containerClient.getBlobClient(filename);
+	public byte[] DownloadImages(@PathParam("id") String filename){
+		blob = containerClientImages.getBlobClient(filename);
 
 		BinaryData data = blob.downloadContent();
 		byte[] arr = data.toBytes();
 		return arr;
 }
+
+	@POST
+	@Path("/videos")
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response.Status UploadVideos(byte[] data){
+		String filename = Hash.of(data);
+		blob = containerClientVideos.getBlobClient(filename);
+		blob.upload(BinaryData.fromBytes(data));
+		return Response.Status.ACCEPTED;
+		//devolver string
+	}
+
+	@GET
+	@Path("/videos/{id}")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public byte[] DownloadVideos(@PathParam("id") String filename){
+		blob = containerClientVideos.getBlobClient(filename);
+
+		BinaryData data = blob.downloadContent();
+		byte[] arr = data.toBytes();
+		return arr;
+	}
 
 
 

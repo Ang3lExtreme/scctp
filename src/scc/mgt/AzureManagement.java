@@ -57,7 +57,7 @@ public class AzureManagement {
 	static final boolean CREATE_REDIS = true;
 
 	// TODO: change your suffix and other names if you want
-	static final String MY_SUFFIX = "tp1-51162-55903-45576"; // Add your suffix here
+	static final String MY_SUFFIX = "tp1"; // Add your suffix here
 	
 	static final String AZURE_COSMOSDB_NAME = "scc23" + MY_SUFFIX;	// Cosmos DB account name
 	static final String AZURE_COSMOSDB_DATABASE = "scc23db" + MY_SUFFIX;	// Cosmos DB database name

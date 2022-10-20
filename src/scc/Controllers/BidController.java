@@ -19,8 +19,8 @@ public class BidController {
     @PathParam("id")
     private String id;
     //create Bid and list all bids for auction
-    private static final String CONNECTION_URL = "";
-    private static final String DB_KEY = "";
+    private static final String CONNECTION_URL = System.getenv("COSMOS_URL");
+    private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
 
     CosmosClient cosmosClient = new CosmosClientBuilder()
             .endpoint(CONNECTION_URL)
