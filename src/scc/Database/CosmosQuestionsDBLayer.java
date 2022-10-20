@@ -36,7 +36,7 @@ public class CosmosQuestionsDBLayer {
     }
     private CosmosClient client;
     private CosmosDatabase db;
-    private CosmosContainer bids;
+    private CosmosContainer questions;
 
     public CosmosQuestionsDBLayer(CosmosClient client) {
         this.client = client;
@@ -46,17 +46,17 @@ public class CosmosQuestionsDBLayer {
         if( db != null)
             return;
         db = client.getDatabase(DB_NAME);
-        bids = db.getContainer("questions");
+        questions = db.getContainer("questions");
     }
 
     public CosmosItemResponse<QuestionsDAO> putQuestion(QuestionsDAO question) {
         init();
-        return bids.createItem(question);
+        return questions.createItem(question);
     }
 
     public CosmosPagedIterable<QuestionsDAO> getQuestions(String auctionId) {
         init();
-        return bids.queryItems("SELECT * FROM questions q WHERE q.auctionId = '" + auctionId + "'", new CosmosQueryRequestOptions(), QuestionsDAO.class);
+        return questions.queryItems("SELECT * FROM questions q WHERE q.auctionId = '" + auctionId + "'", new CosmosQueryRequestOptions(), QuestionsDAO.class);
     }
     public void close() {
         client.close();

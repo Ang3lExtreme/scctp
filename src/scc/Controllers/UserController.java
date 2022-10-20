@@ -7,7 +7,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.User;
-import scc.Database.Client.CosmosUserDBLayer;
+import scc.Database.CosmosUserDBLayer;
 import scc.utils.Hash;
 
 import java.security.MessageDigest;

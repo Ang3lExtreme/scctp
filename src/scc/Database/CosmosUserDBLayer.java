@@ -1,4 +1,4 @@
-package scc.Database.Client;
+package scc.Database;
 
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.CosmosClient;
