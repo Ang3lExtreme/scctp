@@ -17,7 +17,7 @@ public class User {
         super();
         this.id = id;
         this.name = name;
-        this.nickname = name;
+        this.nickname = nickname;
         this.pwd = pwd;
         this.photoId = photoId;
        // this.channelIds = channelIds;
