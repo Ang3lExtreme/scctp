@@ -1,2 +1,5 @@
 /.idea
 /target
+/azure.auth
+/azurekeys-westeurope.props
+/azureprops-westeurope.sh
