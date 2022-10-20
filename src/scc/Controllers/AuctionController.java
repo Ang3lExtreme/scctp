@@ -10,6 +10,7 @@ import scc.Data.DAO.AuctionDAO;
 import scc.Data.DTO.Auction;
 import scc.Database.CosmosAuctionDBLayer;
 
+//testing
 @Path("/rest/auction")
 public class AuctionController {
     private static final String CONNECTION_URL = System.getenv("COSMOS_URL");
