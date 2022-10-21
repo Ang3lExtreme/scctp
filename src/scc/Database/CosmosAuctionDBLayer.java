@@ -71,9 +71,20 @@ public class CosmosAuctionDBLayer {
         return auctions.queryItems("SELECT * FROM auctions", new CosmosQueryRequestOptions(), AuctionDAO.class);
     }
 
+    public CosmosPagedIterable<AuctionDAO> getAuctionsOfUser(String id){
+        init();
+        //get all auctions where the user is the seller
+
+        return auctions.queryItems("SELECT * FROM auctions a WHERE a.ownerId = '" + id + "'", new CosmosQueryRequestOptions(), AuctionDAO.class);
+    }
+
     public void close() {
         client.close();
     }
 
 
+    public CosmosPagedIterable<AuctionDAO> getAuctionsToClose() {
+        init();
+        return auctions.queryItems("SELECT * FROM auctions a WHERE a.endDate < CURRENT_TIMESTAMP", new CosmosQueryRequestOptions(), AuctionDAO.class);
+    }
 }

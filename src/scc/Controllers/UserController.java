@@ -5,8 +5,10 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.User;
+import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
 import scc.utils.Hash;
 
@@ -25,12 +27,20 @@ public class UserController {
             .buildClient();
 
     CosmosUserDBLayer cosmos = new CosmosUserDBLayer(cosmosClient);
+    CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
 
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public CosmosItemResponse<UserDAO> writeUser(User user) throws NoSuchAlgorithmException {
+
+        //get user first by id
+        CosmosPagedIterable<UserDAO> userDAO = cosmos.getUserById(user.getId());
+        //if user exists, return error
+        if(userDAO.iterator().hasNext()){
+            throw new WebApplicationException("User already exists", 409);
+        }
         MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
         messageDigest.update(user.getPwd().getBytes());
         String passHashed = new String(messageDigest.digest());
@@ -89,6 +99,22 @@ public class UserController {
 
             return response;
         }
+
+    @GET
+    @Path("/auctions/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    //get auctions by user id
+    public CosmosPagedIterable<AuctionDAO> getAuctionsByUser(@PathParam("id") String id) {
+        CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
+
+        CosmosPagedIterable<AuctionDAO> auctions;
+        if (user == null) {
+            throw new NotFoundException();
+        } else {
+            auctions = cosmosAuction.getAuctionsOfUser(id);
+        }
+        return auctions;
+    }
 
 
 }

@@ -55,5 +55,15 @@ public class AuctionController {
 
     }
 
+    //get Auctions about to close
+    @GET()
+    @Path("/auctionsToClose")
+    @Produces(MediaType.APPLICATION_JSON)
+    public CosmosPagedIterable<AuctionDAO> getAuctionsToClose(){
+        //get auctions to close
+        return cosmos.getAuctionsToClose();
+    }
+
+
 
 }

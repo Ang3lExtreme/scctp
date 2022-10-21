@@ -1,15 +1,12 @@
 package scc.Database;
 
-import com.azure.cosmos.ConsistencyLevel;
-import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.*;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.UserDAO;
 
 public class CosmosUserDBLayer {
@@ -79,6 +76,8 @@ public class CosmosUserDBLayer {
         init();
         return users.queryItems("SELECT * FROM users ", new CosmosQueryRequestOptions(), UserDAO.class);
     }
+
+
 
     public void close() {
         client.close();
