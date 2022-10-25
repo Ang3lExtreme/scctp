@@ -5,8 +5,12 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.UserDAO;
+import scc.Data.DTO.Login;
+import scc.Data.DTO.Session;
 import scc.Data.DTO.User;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
@@ -14,6 +18,7 @@ import scc.utils.Hash;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 @Path("/user")
 public class UserController {
@@ -114,6 +119,34 @@ public class UserController {
             auctions = cosmosAuction.getAuctionsOfUser(id);
         }
         return auctions;
+    }
+
+    //authenticate user
+
+    @POST
+    @Path("/auth")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response auth(Login user){
+
+        boolean pwdOK = false;
+
+        if(pwdOK) {
+            String uid = UUID.randomUUID().toString();
+            NewCookie cookie = new NewCookie.Builder("scc:session")
+                    .value(uid)
+                    .path("/")
+                    .comment("sessionid")
+                    .maxAge(3600)
+                    .secure(false)
+                    .httpOnly(true)
+                    .build();
+
+          //  RedisLayer.getInstance().putSession(new Session(uid, user.getUser()));
+            return Response.ok().cookie(cookie).build();
+        } else {
+            throw new NotAuthorizedException("Incorrect login");
+        }
+
     }
 
 
