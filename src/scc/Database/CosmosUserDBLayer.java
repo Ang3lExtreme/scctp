@@ -82,6 +82,10 @@ public class CosmosUserDBLayer {
         return users.queryItems("SELECT * FROM users ", new CosmosQueryRequestOptions(), UserDAO.class);
     }
 
+    public CosmosPagedIterable<UserDAO> getUserByNickname(String nickname){
+        init();
+        return users.queryItems("SELECT * FROM users WHERE users.nickname=\"" + nickname + "\"", new CosmosQueryRequestOptions(), UserDAO.class);
+    }
 
 
     public void close() {

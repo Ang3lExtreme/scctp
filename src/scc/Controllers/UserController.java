@@ -52,6 +52,13 @@ public class UserController {
         if(userDAO.iterator().hasNext()){
             throw new WebApplicationException("User already exists", 409);
         }
+
+        //if user have same nickname, return error
+        CosmosPagedIterable<UserDAO> userDAO2 = cosmos.getUserByNickname(user.getNickname());
+        if(userDAO2.iterator().hasNext()){
+            throw new WebApplicationException("Nickname already exists", 409);
+        }
+
         MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
         messageDigest.update(user.getPwd().getBytes());
 
@@ -106,6 +113,15 @@ public class UserController {
             throw new WebApplicationException("User not found", 404);
         }
 
+        //if User user have different nickname, check if nickname is already taken
+        if(!userDB.iterator().next().getNickname().equals(user.getNickname())){
+            CosmosPagedIterable<UserDAO> userDAO2 = cosmos.getUserByNickname(user.getNickname());
+            if(userDAO2.iterator().hasNext()){
+                throw new WebApplicationException("Nickname already exists", 409);
+            }
+        }
+
+
         MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
         messageDigest.update(user.getPwd().getBytes());
 
@@ -147,26 +163,33 @@ public class UserController {
     @POST
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response auth(Login user){
-
-        boolean pwdOK = false;
-
-        if(pwdOK) {
-            String uid = UUID.randomUUID().toString();
-            NewCookie cookie = new NewCookie.Builder("scc:session")
-                    .value(uid)
-                    .path("/")
-                    .comment("sessionid")
-                    .maxAge(3600)
-                    .secure(false)
-                    .httpOnly(true)
-                    .build();
-
-          //  RedisLayer.getInstance().putSession(new Session(uid, user.getUser()));
-            return Response.ok().cookie(cookie).build();
-        } else {
-            throw new NotAuthorizedException("Incorrect login");
+    public Response auth(Login user) throws NoSuchAlgorithmException {
+        CosmosPagedIterable<UserDAO> userDB = cosmos.getUserByNickname(user.getUser());
+        if(!userDB.iterator().hasNext()){
+            throw new WebApplicationException("User not found", 404);
         }
+        UserDAO u = userDB.iterator().next();
+        //hash password
+        MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
+        messageDigest.update(user.getPwd().getBytes());
+        String passHashed = new String(messageDigest.digest());
+
+        if(!u.getPwd().equals(passHashed)){
+            throw new WebApplicationException("Wrong password", 401);
+        }
+
+        String uid = UUID.randomUUID().toString();
+        NewCookie cookie = new NewCookie.Builder("scc:session")
+                .value(uid)
+                .path("/")
+                .comment("sessionid")
+                .maxAge(3600)
+                .secure(false)
+                .httpOnly(true)
+                .build();
+
+        //  RedisLayer.getInstance().putSession(new Session(uid, user.getUser()));
+        return Response.ok().cookie(cookie).build();
 
     }
 

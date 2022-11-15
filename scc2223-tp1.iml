@@ -161,7 +161,7 @@
     <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-servicebus:1.41.4" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.1" level="project" />
     <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-batchai:1.41.4" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0-rc2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:2.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-reload4j:2.0.3" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.reload4j:reload4j:1.2.22" level="project" />
