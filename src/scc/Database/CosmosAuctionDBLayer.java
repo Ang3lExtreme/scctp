@@ -6,6 +6,9 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import scc.Data.DAO.AuctionDAO;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 public class CosmosAuctionDBLayer {
     private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");
     private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
@@ -48,7 +51,7 @@ public class CosmosAuctionDBLayer {
             return;
         }
         db = client.getDatabase(DB_NAME);
-        auctions = db.getContainer("auctions");
+        auctions = db.getContainer("auction");
     }
 
     public CosmosPagedIterable<AuctionDAO> getAuctionsById(String id){
@@ -59,6 +62,11 @@ public class CosmosAuctionDBLayer {
     public CosmosItemResponse<AuctionDAO> putAuction(AuctionDAO auction) {
         init();
         return auctions.createItem(auction);
+    }
+
+    public CosmosItemResponse<AuctionDAO> updateAuction(AuctionDAO auction) {
+        init();
+        return auctions.upsertItem(auction);
     }
 
     public  CosmosPagedIterable<AuctionDAO> getAuctionById(String id){
@@ -85,6 +93,11 @@ public class CosmosAuctionDBLayer {
 
     public CosmosPagedIterable<AuctionDAO> getAuctionsToClose() {
         init();
-        return auctions.queryItems("SELECT * FROM auctions a WHERE a.endDate < CURRENT_TIMESTAMP", new CosmosQueryRequestOptions(), AuctionDAO.class);
-    }
+        //get all auctions that are less than 1 hour away from  and are not closed
+
+
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis()+3600000);
+        return auctions.queryItems("SELECT * FROM c WHERE c.endTime < " + timestamp.getTime() + " AND c.status = 'OPEN'", new CosmosQueryRequestOptions(), AuctionDAO.class);
+
+        }
 }

@@ -135,7 +135,7 @@
         <version>2.6.1</version>  
         <configuration> 
           <schemaVersion>V2</schemaVersion>  
-          <pricingTier>F1</pricingTier>  
+          <pricingTier>B1</pricingTier>
           <region>westeurope</region>  
           <runtime> 
             <os>linux</os>  
@@ -152,8 +152,8 @@
               </resource> 
             </resources> 
           </deployment>  
-          <resourceGroup>scc2223-tp1-rg</resourceGroup>  
-          <appName>scc2223-tp1-rg</appName> 
+          <resourceGroup>scc23-rg-westeurope-tp1</resourceGroup>
+          <appName>scc23appwesteuropetp1</appName>
         </configuration> 
       </plugin> 
     </plugins> 

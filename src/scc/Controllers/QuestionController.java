@@ -6,15 +6,22 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.QuestionsDAO;
+import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Questions;
+import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosQuestionsDBLayer;
+import scc.Database.CosmosUserDBLayer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Path("/auction/{id}/question")
 public class QuestionController {
     //create question and list all questions for auction
-    private static final String CONNECTION_URL = "https://scc23tp1.documents.azure.com:443/";
-    private static final String DB_KEY = "YpAeFIibJ97KY37FQk8j8iarptqtylUdh8rwtaU5DMc7IlDhZdzFlbt5Z7ZKr81ZkLFyv0JSK3rheRhdIcFZIw==";
+    private static final String CONNECTION_URL =  System.getenv("COSMOSDB_URL");
+    private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     //create controller to create and update auctions
     CosmosClient cosmosClient = new CosmosClientBuilder()
             .endpoint(CONNECTION_URL)
@@ -22,6 +29,9 @@ public class QuestionController {
             .buildClient();
 
     CosmosQuestionsDBLayer cosmos =  new CosmosQuestionsDBLayer(cosmosClient);
+    CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
+
+    CosmosUserDBLayer cosmosUser = new CosmosUserDBLayer(cosmosClient);
     @PathParam("id")
     private String id;
 
@@ -30,29 +40,47 @@ public class QuestionController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public CosmosItemResponse<QuestionsDAO> createQuestion(Questions question){
+        //if auction does not exist throw error
+        CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
+        if(!auction.iterator().hasNext()){
+            throw new WebApplicationException("Auction does not exist", 404);
+        }
+        //if user does not exist throw error
+        CosmosPagedIterable<UserDAO> user = cosmosUser.getUserById(question.getUserId());
+        if(!user.iterator().hasNext()){
+            throw new WebApplicationException("User does not exist", 404);
+        }
+
+        //if question already exists throw error
+        CosmosPagedIterable<QuestionsDAO> questions = cosmos.getQuestionById(question.getUserId(),question.getAuctionId(),question.getId());
+        if(questions.iterator().hasNext()){
+            throw new WebApplicationException("Question already exists", 409);
+        }
+
         //create question
-        QuestionsDAO qu = new QuestionsDAO(question.getAuctionId(), question.getUserId(), question.getMessage());
+        QuestionsDAO qu = new QuestionsDAO(question.getId(),question.getAuctionId(), question.getUserId(), question.getMessage());
         CosmosItemResponse<QuestionsDAO> response = cosmos.putQuestion(qu);
         return response;
     }
 
     @GET
     @Path("/list")
-    public Questions[] listQuestions() {
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Questions> listQuestions() {
+        //if auction does not exist return 404
+        CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
+
+        if(!auction.iterator().hasNext()){
+            throw new WebApplicationException("Auction does not exist", 404);
+        }
+
         //list all questions using cosmos
-        CosmosPagedIterable<QuestionsDAO> questions = cosmos.getQuestions(id);
-        if (questions == null) {
-            throw new NotFoundException();
+        List<Questions> questions = new ArrayList<>();
+        CosmosPagedIterable<QuestionsDAO> questionsDAO = cosmos.getQuestions(id);
+        for (QuestionsDAO q : questionsDAO) {
+            questions.add(new Questions(q.getId(),q.getAuctionId(), q.getUserId(), q.getMessage()));
         }
-        Questions[] questionsList = new Questions[questions.stream().toArray().length];
-        int i = 0;
-        for (QuestionsDAO q : questions) {
-            questionsList[i] = new Questions(q.getAuctionId(), q.getUserId(), q.getMessage());
-            i++;
-        }
-        return questionsList;
-
-
+        return questions;
 
     }
 }

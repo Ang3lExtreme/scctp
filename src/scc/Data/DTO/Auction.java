@@ -1,26 +1,41 @@
 package scc.Data.DTO;
 
+import java.util.Date;
+
 public class Auction {
-    private String auctionId;
+    private String id;
     private String title;
     private String description;
     private String imageId;
     private String ownerId;
-    private String endTime;
+    private Date endTime;
     private float minPrice;
     private String winnerId = null;
     private Status status = Status.OPEN;
 
-    public Auction(String auctionId, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
+    public Auction(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
         super();
-        this.auctionId = auctionId;
+        this.id = id;
         this.title = title;
         this.description = description;
         this.imageId = imageId;
         this.ownerId = ownerId;
-        this.endTime = endTime;
+        //parse endTime to Date
+        this.endTime = new Date(endTime);
         this.minPrice = minPrice;
 
+    }
+    //constructor including winnerId and status
+    public Auction(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice, String winnerId, Status status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.imageId = imageId;
+        this.ownerId = ownerId;
+        this.endTime = new Date(endTime);
+        this.minPrice = minPrice;
+        this.winnerId = winnerId;
+        this.status = status;
     }
 
     public Auction(){
@@ -28,11 +43,11 @@ public class Auction {
     }
 
     public String getAuctionId() {
-        return auctionId;
+        return id;
     }
 
-    public void setAuctionId(String auctionId) {
-        this.auctionId = auctionId;
+    public void setAuctionId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -67,12 +82,12 @@ public class Auction {
         this.ownerId = ownerId;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
     public void setEndTime(String endTime) {
-        this.endTime = endTime;
+        this.endTime = new Date(endTime);
     }
 
     public float getMinPrice() {

@@ -3,16 +3,18 @@ package scc.Data.DAO;
 import scc.Data.DTO.Auction;
 import scc.Data.DTO.Status;
 
+import java.util.Date;
+
 //based ib Action and UserDAO classes
 public class AuctionDAO {
     private String _rid;
     private String _ts;
-    private String auctionId;
+    private String id;
     private String title;
     private String description;
     private String imageId;
     private String ownerId;
-    private String endTime;
+    private Date endTime;
     private float minPrice;
     private String winnerId = null;
     private Status status = Status.OPEN;
@@ -20,37 +22,38 @@ public class AuctionDAO {
     public AuctionDAO() {
     }
     public AuctionDAO( Auction a) {
-        this(a.getAuctionId(), a.getTitle(), a.getDescription(),a.getImageId(), a.getOwnerId(), a.getEndTime(), a.getMinPrice());
+        this(a.getAuctionId(), a.getTitle(), a.getDescription(),a.getImageId(), a.getOwnerId(), a.getEndTime().toString(), a.getMinPrice());
     }
-    public AuctionDAO(String auctionId, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
+    public AuctionDAO(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
         super();
-        this.auctionId = auctionId;
+        this.id = id;
         this.title = title;
         this.description = description;
         this.imageId = imageId;
         this.ownerId = ownerId;
-        this.endTime = endTime;
+        //parse endTime to Date
+        this.endTime = new Date(endTime);
         this.minPrice = minPrice;
 
     }
-    //constroctor including winnerId and status
-    public AuctionDAO(String auctionId, String title, String description, String imageId, String ownerId, String endTime, float minPrice, String winnerId, Status status) {
-        this.auctionId = auctionId;
+    //constructor including winnerId and status
+    public AuctionDAO(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice, String winnerId, Status status) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.imageId = imageId;
         this.ownerId = ownerId;
-        this.endTime = endTime;
+        this.endTime = new Date(endTime);
         this.minPrice = minPrice;
         this.winnerId = winnerId;
         this.status = status;
     }
 
-    public String getAuctionId() {
-        return auctionId;
+    public String getId() {
+        return id;
     }
-    public void setAuctionId(String auctionId) {
-        this.auctionId = auctionId;
+    public void setId(String id) {
+        this.id = id;
     }
     public String getTitle() {
         return title;
@@ -76,11 +79,11 @@ public class AuctionDAO {
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
     }
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void Date(String endTime) {
+        this.endTime = new Date(endTime);
     }
     public float getMinPrice() {
         return minPrice;

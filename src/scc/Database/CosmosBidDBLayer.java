@@ -43,7 +43,7 @@ public class CosmosBidDBLayer {
         if( db != null)
             return;
         db = client.getDatabase(DB_NAME);
-        bids = db.getContainer("bids");
+        bids = db.getContainer("bid");
     }
 
     public CosmosItemResponse<BidDAO> putBid(BidDAO bid) {
@@ -54,6 +54,11 @@ public class CosmosBidDBLayer {
     public CosmosPagedIterable<BidDAO> getBids(String id) {
         init();
         return bids.queryItems("SELECT * FROM bids b WHERE b.auctionId = '" + id + "'", new CosmosQueryRequestOptions(), BidDAO.class);
+    }
+
+   public CosmosPagedIterable<BidDAO> getBidById(String bidId, String auctionId) {
+        init();
+        return bids.queryItems("SELECT * FROM bids b WHERE b.id = '" + bidId + "' AND b.auctionId = '" + auctionId + "'", new CosmosQueryRequestOptions(), BidDAO.class);
     }
     public void close() {
         client.close();

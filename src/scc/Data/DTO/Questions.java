@@ -2,18 +2,28 @@ package scc.Data.DTO;
 
 
 public class Questions {
+
+    private String id;
 private String auctionId;
     private String userId;
     private String message;
 
-    public Questions(String auctionId, String userId, String message) {
+    public Questions(String id,String auctionId, String userId, String message) {
         super();
+        this.id = id;
         this.auctionId = auctionId;
         this.userId = userId;
         this.message = message;
     }
 
     public Questions(){}
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getAuctionId() {
         return auctionId;

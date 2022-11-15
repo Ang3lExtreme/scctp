@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/ctrl")
 public class ControlResource
 {
+	private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");
 
 	/**
 	 * This methods just prints a string. It may be useful to check if the current 
@@ -20,7 +21,7 @@ public class ControlResource
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String hello() {
-		return "v: 0001";
+		return System.getenv().toString() + " v: 0001 " + CONNECTION_URL;
 	}
 
 }

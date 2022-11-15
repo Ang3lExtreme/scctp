@@ -2,18 +2,28 @@ package scc.Data.DTO;
 
 
 public class Bid {
+
+    private String id;
     private String auctionId;
     private String userId;
     private float value;
 
-    public Bid(String auctionId, String userId, float value) {
+    public Bid(String id,String auctionId, String userId, float value) {
         super();
+        this.id = id;
         this.auctionId = auctionId;
         this.userId = userId;
         this.value = value;
     }
 
     public Bid(){}
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getAuctionId() {
         return auctionId;

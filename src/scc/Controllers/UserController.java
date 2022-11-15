@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.UserDAO;
+import scc.Data.DTO.Auction;
 import scc.Data.DTO.Login;
 import scc.Data.DTO.Session;
 import scc.Data.DTO.User;
@@ -18,6 +19,9 @@ import scc.utils.Hash;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/user")
@@ -26,6 +30,8 @@ public class UserController {
     private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     private static final String HASHCODE = "SHA-256";
 
+
+    //endpoint cannot be null
     CosmosClient cosmosClient = new CosmosClientBuilder()
             .endpoint(CONNECTION_URL)
             .key(DB_KEY)
@@ -38,7 +44,7 @@ public class UserController {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CosmosItemResponse<UserDAO> writeUser(User user) throws NoSuchAlgorithmException {
+    public User writeUser(User user) throws NoSuchAlgorithmException {
 
         //get user first by id
         CosmosPagedIterable<UserDAO> userDAO = cosmos.getUserById(user.getId());
@@ -48,26 +54,31 @@ public class UserController {
         }
         MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
         messageDigest.update(user.getPwd().getBytes());
+
         String passHashed = new String(messageDigest.digest());
         user.setPwd(passHashed);
         UserDAO u = new UserDAO(user.getId(), user.getName(), user.getNickname() ,user.getPwd(), user.getPhotoId());
 
         CosmosItemResponse<UserDAO> response = cosmos.putUser(u);
 
-        return response;
+        return user;
 
     }
+
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public CosmosPagedIterable<UserDAO> getUser(@PathParam("id") String id) {
+    public User getUser(@PathParam("id") String id) {
         CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
-
-        if(user == null){
-            throw new NotFoundException();
+        if(!user.iterator().hasNext()){
+            throw new WebApplicationException("User not found", 404);
         }
-        return user;
+
+        UserDAO userDAO = user.iterator().next();
+        User u = new User(userDAO.getId(), userDAO.getName(), userDAO.getNickname(), userDAO.getPwd(), userDAO.getPhotoId());
+
+        return u;
     }
 
     @DELETE()
@@ -76,8 +87,8 @@ public class UserController {
     public CosmosPagedIterable<UserDAO> delUser(@PathParam("id") String id) {
         CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
 
-        if(user == null){
-            throw new NotFoundException();
+        if(!user.iterator().hasNext()){
+            throw new WebApplicationException("User not found", 404);
         }
         //else delete user
         CosmosItemResponse<Object> response = cosmos.delUserById(id);
@@ -88,37 +99,47 @@ public class UserController {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-      public CosmosItemResponse<UserDAO> updateUser(@PathParam("id") String id, User user) throws NoSuchAlgorithmException {
+      public User updateUser(@PathParam("id") String id, User user) throws NoSuchAlgorithmException {
             CosmosPagedIterable<UserDAO> userDB = cosmos.getUserById(id);
 
-            if(userDB == null){
-                throw new NotFoundException();
-            }
-            //else update user
-            Hash messageDigest = new Hash();
-            String passHashed = new String(messageDigest.digest(user.getPwd().getBytes()));
+        if(!userDB.iterator().hasNext()){
+            throw new WebApplicationException("User not found", 404);
+        }
 
-            UserDAO u = new UserDAO(user.getId(), user.getName(), user.getNickname(),passHashed, user.getPhotoId());
+        MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
+        messageDigest.update(user.getPwd().getBytes());
 
-            CosmosItemResponse<UserDAO> response = cosmos.putUser(u);
+        String passHashed = new String(messageDigest.digest());
+        user.setPwd(passHashed);
 
-            return response;
+        UserDAO u = new UserDAO(user.getId(), user.getName(), user.getNickname(),user.getPwd(), user.getPhotoId());
+
+        CosmosItemResponse<UserDAO> response = cosmos.updateUser(u);
+
+            return user;
         }
 
     @GET
     @Path("/auctions/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     //get auctions by user id
-    public CosmosPagedIterable<AuctionDAO> getAuctionsByUser(@PathParam("id") String id) {
+    public List<Auction> getAuctionsByUser(@PathParam("id") String id) {
         CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
 
         CosmosPagedIterable<AuctionDAO> auctions;
-        if (user == null) {
-            throw new NotFoundException();
+        if(!user.iterator().hasNext()){
+            throw new WebApplicationException("User not found", 404);
         } else {
             auctions = cosmosAuction.getAuctionsOfUser(id);
         }
-        return auctions;
+        //put auctions in list
+        List<Auction> auctionList = new ArrayList<>();
+        for(AuctionDAO auction : auctions){
+            auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
+                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+        }
+        return auctionList;
+
     }
 
     //authenticate user

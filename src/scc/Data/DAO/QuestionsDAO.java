@@ -5,12 +5,14 @@ import scc.Data.DTO.Questions;
 public class QuestionsDAO {
     private String _rid;
     private String _ts;
+    private String id;
     private String auctionId;
     private String userId;
     private String message;
 
-    public QuestionsDAO(String auctionId, String userId, String message) {
+    public QuestionsDAO(String id, String auctionId, String userId, String message) {
         super();
+        this.id = id;
         this.auctionId = auctionId;
         this.userId = userId;
         this.message = message;
@@ -20,10 +22,18 @@ public class QuestionsDAO {
 
     }
 
+
+
     public QuestionsDAO(Questions q){
-        this(q.getAuctionId(), q.getUserId(), q.getMessage());
+        this(q.getId(),q.getAuctionId(), q.getUserId(), q.getMessage());
     }
 
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
     public String get_rid() {
         return _rid;
     }
