@@ -161,6 +161,10 @@ public class BidController {
             }
         }
 
+        if (lastBid == null) {
+            return null;
+        }
+
         Bid bid = new Bid(lastBid.getId(), lastBid.getAuctionId(), lastBid.getUserId(), lastBid.getValue());
         return bid;
 
