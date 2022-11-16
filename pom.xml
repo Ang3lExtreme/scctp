@@ -3,14 +3,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
   <modelVersion>4.0.0</modelVersion>  
   <groupId>pt.unl.fct.di.scc</groupId>  
-  <artifactId>scc2223-tp1</artifactId>  
+  <artifactId>scc2223-51162</artifactId>
   <version>1.0</version>  
-  <packaging>war</packaging>  
+  <packaging>war</packaging>
+  <name>Azure Java Functions</name>
   <properties> 
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-    <authors>51162-55903-45576</authors> 
-  </properties>  
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>17</java.version>
+    <authors>51162-55903-45576</authors>
+    <functionAppName>scc23appwesteurope51162</functionAppName>
+    <functionAppRegion>westeurope</functionAppRegion>
+    <functionPricingTier>B1</functionPricingTier>
+    <functionResourceGroup>scc23-rg-westeurope-51162</functionResourceGroup>
+  </properties>
   <dependencies>
+    <dependency>
+      <groupId>com.microsoft.azure.functions</groupId>
+      <artifactId>azure-functions-java-library</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
@@ -118,17 +130,9 @@
         <version>3.10.1</version>  
         <configuration> 
           <source>17</source>  
-          <target>17</target> 
+          <target>17</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
         </configuration> 
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <archive/>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
       </plugin>
       <plugin> 
         <artifactId>maven-war-plugin</artifactId>  
@@ -141,11 +145,11 @@
         <groupId>com.microsoft.azure</groupId>  
         <artifactId>azure-webapp-maven-plugin</artifactId>  
         <version>2.6.1</version>  
-        <configuration> 
-          <schemaVersion>V2</schemaVersion>  
-          <pricingTier>B1</pricingTier>
-          <region>westeurope</region>  
-          <runtime> 
+        <configuration>
+            <schemaVersion>V2</schemaVersion>
+          <region>${functionAppRegion}</region>
+          <pricingTier>${functionPricingTier}</pricingTier>
+          <runtime>
             <os>linux</os>  
             <javaVersion>Java 17</javaVersion>  
             <webContainer>Tomcat 10.0</webContainer> 
@@ -160,10 +164,55 @@
               </resource> 
             </resources> 
           </deployment>  
-          <resourceGroup>scc23-rg-westeurope-tp1</resourceGroup>
-          <appName>scc23appwesteuropetp1</appName>
+          <resourceGroup>${functionResourceGroup}</resourceGroup>
+          <appName>${functionAppName}</appName>
         </configuration> 
-      </plugin> 
+      </plugin>
+      <plugin>
+        <groupId>com.microsoft.azure</groupId>
+        <artifactId>azure-functions-maven-plugin</artifactId>
+        <version>1.21.0</version>
+        <configuration>
+          <appName>${functionAppName}</appName>
+          <resourceGroup>${functionResourceGroup}</resourceGroup>
+          <region>${functionAppRegion}</region>
+          <pricingTier>${functionPricingTier}</pricingTier>
+          <disableAppInsights></disableAppInsights>
+          <runtime>
+            <os>linux</os>
+            <javaVersion>Java 17</javaVersion>
+            </runtime>
+          <appSettings>
+            <property>
+              <name>FUNCTIONS_EXTENSION_VERSION</name>
+              <value>~3</value>
+            </property>
+            <property>
+              <name>WEBSITE_RUN_FROM_PACKAGE</name>
+              <value>1</value>
+            </property>
+          </appSettings>
+        </configuration>
+        <executions>
+          <execution>
+            <id>package-functions</id>
+            <goals>
+              <goal>package</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>obj</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
     </plugins> 
   </build> 
 </project>
