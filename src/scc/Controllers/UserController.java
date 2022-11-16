@@ -3,10 +3,14 @@ package scc.Controllers;
 import com.azure.cosmos.*;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+import redis.clients.jedis.Jedis;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Auction;
@@ -15,6 +19,7 @@ import scc.Data.DTO.Session;
 import scc.Data.DTO.User;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
+import scc.cache.RedisCache;
 import scc.utils.Hash;
 
 import java.security.MessageDigest;
@@ -24,21 +29,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import static scc.mgt.AzureManagement.CREATE_REDIS;
+
 @Path("/user")
 public class UserController {
     private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");
     private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     private static final String HASHCODE = "SHA-256";
 
+    private Jedis jedis = CREATE_REDIS ? RedisCache.getCachePool().getResource() : null;
 
     //endpoint cannot be null
-    CosmosClient cosmosClient = new CosmosClientBuilder()
+    private CosmosClient cosmosClient = new CosmosClientBuilder()
             .endpoint(CONNECTION_URL)
             .key(DB_KEY)
             .buildClient();
 
-    CosmosUserDBLayer cosmos = new CosmosUserDBLayer(cosmosClient);
-    CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
+    private CosmosUserDBLayer cosmos = new CosmosUserDBLayer(cosmosClient);
+    private CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
 
     @POST
     @Path("/")
@@ -163,7 +171,7 @@ public class UserController {
     @POST
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response auth(Login user) throws NoSuchAlgorithmException {
+    public Response auth(Login user) throws NoSuchAlgorithmException, JsonProcessingException {
         CosmosPagedIterable<UserDAO> userDB = cosmos.getUserByNickname(user.getUser());
         if(!userDB.iterator().hasNext()){
             throw new WebApplicationException("User not found", 404);
@@ -188,10 +196,13 @@ public class UserController {
                 .httpOnly(true)
                 .build();
 
-        //  RedisLayer.getInstance().putSession(new Session(uid, user.getUser()));
+        if(CREATE_REDIS) {
+            Session s = new Session(uid, user.getUser());
+            ObjectMapper mapper = new ObjectMapper();
+            jedis.set("user:" + u.getId(), mapper.writeValueAsString(s));
+        }
+
         return Response.ok().cookie(cookie).build();
 
     }
-
-
 }
