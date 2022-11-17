@@ -82,7 +82,6 @@ public class BidController {
 
         CosmosItemResponse<BidDAO> response = cosmos.putBid(b);
         return bid;
-
     }
 
     @GET()

@@ -54,7 +54,7 @@ public class AzureManagement {
 	// TODO: These variable allow you to control what is being created
 	static final boolean CREATE_STORAGE = true;
 	static final boolean CREATE_COSMOSDB = true;
-	static final boolean CREATE_REDIS = true;
+	public static final boolean CREATE_REDIS = true;
 
 	public static final boolean USE_CACHE = true;
 
@@ -62,9 +62,8 @@ public class AzureManagement {
 	static final String MY_SUFFIX = "51162"; // Add your suffix here
 	static final String AZURE_COSMOSDB_NAME = "scc23" + MY_SUFFIX;	// Cosmos DB account name
 	static final String AZURE_COSMOSDB_DATABASE = "scc23db" + MY_SUFFIX;	// Cosmos DB database name
-	static final String[] BLOB_CONTAINERS = { "images", "videos" };	// Containers to add to the blob storage
-
-	static final Region[] REGIONS = new Region[] { Region.EUROPE_WEST}; // Define the regions to deploy resources here
+	static final String[] BLOB_CONTAINERS = { "images" };	// Containers to add to the blob storage
+	static final Region[] REGIONS = new Region[] { Region.EUROPE_WEST, Region.US_EAST}; // Define the regions to deploy resources here
 	
 	// Name of resoruce group for each region
 	static final String[] AZURE_RG_REGIONS = Arrays.stream(REGIONS)

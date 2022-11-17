@@ -7,7 +7,7 @@
   <version>1.0</version>  
   <packaging>war</packaging>
   <name>Azure Java Functions</name>
-  <properties>
+  <properties> 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
     <authors>51162-55903-45576</authors>
@@ -159,7 +159,7 @@
               <resource> 
                 <directory>${project.basedir}/target</directory>  
                 <includes> 
-                  <include>*.war</include>
+                  <include>*.war</include> 
                 </includes> 
               </resource> 
             </resources> 

@@ -75,7 +75,6 @@ public class AuctionController {
         } catch (NotAuthorizedException e) {
             throw new WebApplicationException(e.toString(), Response.Status.UNAUTHORIZED);
         }
-
         //update auction
         CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
         if(!aucDB.iterator().hasNext()){

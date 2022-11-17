@@ -54,8 +54,6 @@ public class TimerFunction {
 
     }
 
-    //TODO: function to sync all databases
-
 
 
 }

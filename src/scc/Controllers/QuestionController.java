@@ -30,6 +30,7 @@ public class QuestionController {
 
     CosmosQuestionsDBLayer cosmos =  new CosmosQuestionsDBLayer(cosmosClient);
     CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
+
     CosmosUserDBLayer cosmosUser = new CosmosUserDBLayer(cosmosClient);
     @PathParam("id")
     private String id;
@@ -59,7 +60,7 @@ public class QuestionController {
         //create question
         QuestionsDAO qu = new QuestionsDAO(question.getId(),question.getAuctionId(), question.getUserId(), question.getMessage());
         CosmosItemResponse<QuestionsDAO> response = cosmos.putQuestion(qu);
-        return question;
+       return question;
     }
 
     @GET

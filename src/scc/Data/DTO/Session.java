@@ -1,11 +1,10 @@
 package scc.Data.DTO;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Cookie;
 import redis.clients.jedis.Jedis;
 import scc.cache.RedisCache;
-
-import javax.ws.rs.NotAuthorizedException;
 
 public class Session {
 
@@ -48,10 +47,10 @@ public class Session {
         if (!s.getUser().equals(id) && !s.getUser().equals("admin"))
             throw new NotAuthorizedException("Invalid user: " + s.getUser());
 
-
         return s;
 
     }
+
 
 
 }

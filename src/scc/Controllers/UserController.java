@@ -20,23 +20,25 @@ import scc.Data.DTO.User;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
 import scc.cache.RedisCache;
+import scc.utils.Hash;
+import static scc.mgt.AzureManagement.USE_CACHE;
+
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import static scc.mgt.AzureManagement.USE_CACHE;
-
+import static scc.mgt.AzureManagement.CREATE_REDIS;
 
 @Path("/user")
 public class UserController {
     private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");
     private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     private static final String HASHCODE = "SHA-256";
-
-    private Jedis jedis = RedisCache.getCachePool().getResource();
+    private Jedis jedis;
 
     //endpoint cannot be null
     private CosmosClient cosmosClient = new CosmosClientBuilder()
@@ -44,14 +46,15 @@ public class UserController {
             .key(DB_KEY)
             .buildClient();
 
-    private CosmosUserDBLayer cosmos = new CosmosUserDBLayer(cosmosClient);
-    private CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
-
-    /*private synchronized void initCache() {
+    private synchronized void initCache() {
         if(jedis != null)
             return;
         jedis = RedisCache.getCachePool().getResource();
-    }*/
+    }
+
+    private CosmosUserDBLayer cosmos = new CosmosUserDBLayer(cosmosClient);
+    private CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
+
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -176,6 +179,7 @@ public class UserController {
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response auth(Login user) throws NoSuchAlgorithmException, JsonProcessingException {
+        initCache();
         CosmosPagedIterable<UserDAO> userDB = cosmos.getUserByNickname(user.getUser());
         if(!userDB.iterator().hasNext()){
             throw new WebApplicationException("User not found", 404);
