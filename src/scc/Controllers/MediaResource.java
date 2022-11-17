@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.MediaType;
 public class MediaResource
 {
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=sccstwesteuropetp1;AccountKey=4980tpHibMsujSB1PjPqwoiN9XESMweJ3eOrHzA6p53URii/2O79OkZKh75/JClWR6/X2mB4qlpD+AStwAoiyw==;EndpointSuffix=core.windows.net";
+	String storageConnectionString = System.getenv("BlobStoreConnection");
 	BlobContainerClient containerClientImages = new BlobContainerClientBuilder()
                 .connectionString(storageConnectionString)
                 .containerName("images")

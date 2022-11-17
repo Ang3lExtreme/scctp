@@ -30,7 +30,6 @@ public class QuestionController {
 
     CosmosQuestionsDBLayer cosmos =  new CosmosQuestionsDBLayer(cosmosClient);
     CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
-
     CosmosUserDBLayer cosmosUser = new CosmosUserDBLayer(cosmosClient);
     @PathParam("id")
     private String id;
@@ -39,7 +38,7 @@ public class QuestionController {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CosmosItemResponse<QuestionsDAO> createQuestion(Questions question){
+    public Questions createQuestion(Questions question){
         //if auction does not exist throw error
         CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
         if(!auction.iterator().hasNext()){
@@ -60,7 +59,7 @@ public class QuestionController {
         //create question
         QuestionsDAO qu = new QuestionsDAO(question.getId(),question.getAuctionId(), question.getUserId(), question.getMessage());
         CosmosItemResponse<QuestionsDAO> response = cosmos.putQuestion(qu);
-        return response;
+        return question;
     }
 
     @GET

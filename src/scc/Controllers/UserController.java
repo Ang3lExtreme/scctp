@@ -48,6 +48,11 @@ public class UserController {
     private CosmosUserDBLayer cosmos = new CosmosUserDBLayer(cosmosClient);
     private CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
 
+    /*private synchronized void initCache() {
+        if(jedis != null)
+            return;
+        jedis = RedisCache.getCachePool().getResource();
+    }*/
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)

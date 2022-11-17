@@ -45,7 +45,7 @@ public class BidController {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CosmosItemResponse<BidDAO> createBid(Bid bid) {
+    public Bid createBid(Bid bid) {
         //create bid
         BidDAO b = new BidDAO(bid.getId(),bid.getAuctionId(), bid.getUserId(), bid.getValue());
 
@@ -81,7 +81,8 @@ public class BidController {
         verifyBid(auctionDTO,bid);
 
         CosmosItemResponse<BidDAO> response = cosmos.putBid(b);
-        return response;
+        return bid;
+
     }
 
     @GET()
