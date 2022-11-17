@@ -5,10 +5,13 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Auction;
+import scc.Data.DTO.Session;
 import scc.Data.DTO.Status;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
@@ -66,7 +69,13 @@ public class AuctionController {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Auction updateAuction(@PathParam("id") String id, Auction auction){
+    public Auction updateAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Auction auction){
+        try {
+            Session.checkCookieUser(session, id);
+        } catch (NotAuthorizedException e) {
+            throw new WebApplicationException(e.toString(), Response.Status.UNAUTHORIZED);
+        }
+
         //update auction
         CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
         if(!aucDB.iterator().hasNext()){

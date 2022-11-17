@@ -20,16 +20,15 @@ import scc.Data.DTO.User;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
 import scc.cache.RedisCache;
-import scc.utils.Hash;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import static scc.mgt.AzureManagement.CREATE_REDIS;
+import static scc.mgt.AzureManagement.USE_CACHE;
+
 
 @Path("/user")
 public class UserController {
@@ -37,7 +36,7 @@ public class UserController {
     private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     private static final String HASHCODE = "SHA-256";
 
-    private Jedis jedis = CREATE_REDIS ? RedisCache.getCachePool().getResource() : null;
+    private Jedis jedis = RedisCache.getCachePool().getResource();
 
     //endpoint cannot be null
     private CosmosClient cosmosClient = new CosmosClientBuilder()
@@ -196,11 +195,9 @@ public class UserController {
                 .httpOnly(true)
                 .build();
 
-        if(CREATE_REDIS) {
-            Session s = new Session(uid, user.getUser());
-            ObjectMapper mapper = new ObjectMapper();
-            jedis.set("user:" + u.getId(), mapper.writeValueAsString(s));
-        }
+        Session s = new Session(uid, user.getUser());
+        ObjectMapper mapper = new ObjectMapper();
+        jedis.set("user:" + u.getId(), mapper.writeValueAsString(s));
 
         return Response.ok().cookie(cookie).build();
 
