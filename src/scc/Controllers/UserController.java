@@ -6,7 +6,6 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
@@ -21,6 +20,8 @@ import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
 import scc.cache.RedisCache;
 import scc.utils.Hash;
+
+import static jakarta.ws.rs.core.Response.Status.*;
 import static scc.mgt.AzureManagement.USE_CACHE;
 
 
@@ -178,20 +179,24 @@ public class UserController {
     @POST
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response auth(Login user) throws NoSuchAlgorithmException, JsonProcessingException {
+    public Response auth(Login login) throws NoSuchAlgorithmException, JsonProcessingException {
+        String user = login.getUser();
+        String pwd = login.getPwd();
+        if(user == null || user.equals("") || pwd == null || pwd.equals(""))
+            return Response.status(NO_CONTENT).entity("Invalid user login").build();
         initCache();
-        CosmosPagedIterable<UserDAO> userDB = cosmos.getUserByNickname(user.getUser());
+        CosmosPagedIterable<UserDAO> userDB = cosmos.getUserByNickname(user);
         if(!userDB.iterator().hasNext()){
-            throw new WebApplicationException("User not found", 404);
+            return Response.status(NOT_FOUND).entity("User not found").build();
         }
         UserDAO u = userDB.iterator().next();
         //hash password
         MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
-        messageDigest.update(user.getPwd().getBytes());
+        messageDigest.update(pwd.getBytes());
         String passHashed = new String(messageDigest.digest());
 
         if(!u.getPwd().equals(passHashed)){
-            throw new WebApplicationException("Wrong password", 401);
+            return Response.status(FORBIDDEN).entity("Wrong password").build();
         }
 
         String uid = UUID.randomUUID().toString();
@@ -204,9 +209,9 @@ public class UserController {
                 .httpOnly(true)
                 .build();
 
-        Session s = new Session(uid, user.getUser());
+        Session s = new Session(uid, user);
         ObjectMapper mapper = new ObjectMapper();
-        jedis.set("user:" + u.getId(), mapper.writeValueAsString(s));
+        jedis.set("user:" + user, mapper.writeValueAsString(s));
 
         return Response.ok().cookie(cookie).build();
 

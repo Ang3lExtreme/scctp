@@ -70,11 +70,6 @@ public class AuctionController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Auction updateAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Auction auction){
-        try {
-            Session.checkCookieUser(session, id);
-        } catch (NotAuthorizedException e) {
-            throw new WebApplicationException(e.toString(), Response.Status.UNAUTHORIZED);
-        }
         //update auction
         CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
         if(!aucDB.iterator().hasNext()){
@@ -83,6 +78,12 @@ public class AuctionController {
 
         AuctionDAO au = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
                 auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(),auction.getStatus());
+
+        try {
+            Session.checkCookieUser(session, au.getOwnerId());
+        } catch (Exception e) {
+            throw new WebApplicationException(e.toString(), e.getCause());
+        }
 
         verifyAuction(aucDB.iterator().next(), auction);
 

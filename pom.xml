@@ -11,10 +11,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
     <authors>51162-55903-45576</authors>
-    <functionAppName>scc23appwesteurope51162</functionAppName>
+    <functionAppName>scc23appwesteurope45576</functionAppName>
     <functionAppRegion>westeurope</functionAppRegion>
     <functionPricingTier>B1</functionPricingTier>
-    <functionResourceGroup>scc23-rg-westeurope-51162</functionResourceGroup>
+    <functionResourceGroup>scc23-rg-westeurope-45576</functionResourceGroup>
   </properties>
   <dependencies>
     <dependency>
@@ -93,7 +93,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.14.0-rc2</version>
+      <version>2.14.0</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
@@ -203,6 +203,7 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
         <version>3.2.0</version>
         <configuration>
