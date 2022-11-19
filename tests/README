@@ -1,0 +1,94 @@
+**** Intro
+These scripts are given to help students tests their project.
+It is not mandatory to use these scripts. 
+
+Students may change and extend these scripts as appropriate, given the 
+endpoints defined in their projects.
+
+
+**** Scripts to initialize the system
+
+create-users.yml -> creates 100 users (if starting with a fresh database, delete file "users.data")
+create-auctions.yml -> creates 300 auctions with a variable number of bids and questions
+
+**** Script to test the system
+
+workload1.yml -> workload with 3 scenarios: (1) user that checks her auctions;
+(2) user that checks auctions it follows; (3) user that does a variable sequence
+of mixed operations.
+
+**** Endpoint used
+
+POST:/media -> uploads image
+GET:/media/{id} -> downloads image
+
+POST:/user -> creates a new user
+POST:/user/auth -> authentication method
+GET:/user/{id} -> gets a user
+
+GET:/user/{id}/auctions -> list of auctions of a user
+GET:/user/{id}/auctions?status="OPEN" -> list of open auctions of a user
+GET:/user/{id}/following -> list of auctions a user is following
+
+POST:/auction -> creates a new auction
+GET:/auction/{id} -> gets an auction
+
+POST:/auction/{id}/bid -> add bid to auction id
+GET:/auction/{id}/bid -> list bids of auction (assumes in the first position is winning bid)
+
+POST:/auction/{id}/question -> add question to auction id
+GET:/auction/{id}/question -> list questions of auction
+GET:/auction/{id}/question/{question id} -> list question
+POST:/auction/{id}/question/{question id}/reply -> add reply to auction id, question id
+
+GET:/auction/any/popular -> returns list of popular auctions
+GET:/auction/any/recent -> returns list of recent auctions
+
+**** Data classes
+
+The scripts assume the following data objects. You may change the scripts if you have different
+data objects.
+
+public class Auction {
+	private String id;
+	private String title;
+	private String imageId;
+	private String description;
+	private String owner;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+	private Date endTime;
+	private float minimumPrice;
+	private String status;
+	private Bid bid;
+}
+
+public class Bid {
+	private String id;
+	private String auctionId;
+	private String user;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+	private Date time;
+	private float value;
+}
+
+public class Login {
+	private String user;
+	private String pwd;
+}
+
+public class Message {
+	private String id;
+	private String auctionId;
+	private String user;
+	private String text;
+	private String reply; // includes the text of reply (null if does not exist)
+}
+
+public class User {
+	private String id;
+	private String name;
+	private String pwd;
+	private String photoId;
+}
+
+

@@ -1,0 +1,44 @@
+config:
+  target: 'https://scc23appnortheurope4204.azurewebsites.net/rest'
+  http:
+    timeout: 30
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true  # new mode to aggregate metrics in artillery
+  processor: "./test-utils.js"
+  variables:
+    numUsers : 100
+  phases:
+  - name: "Create users"    # Create users
+    duration: 1
+    arrivalCount: 1
+
+scenarios:
+  - name: 'Create users'
+    weight: 1
+    flow:
+      - loop:                            # let's create 100 users - loop ... count
+        - post:                          # First: post image for the user
+            url: "/media"
+            name: "POST:/media"
+            headers:
+              Content-Type: application/octet-stream
+              Accept: application/json
+            beforeRequest: "uploadImageBody"
+            capture: 
+              regexp: "(.+)"
+              as: "imageId"              # capture the reply as image id to be used in user creation
+        - function: "genNewUser"         # Generate the needed information for the user
+        - post:
+            url: "/user"
+            name: "POST:/user"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+            json:
+              id: "{{ id }}"
+              name: "{{ name }}"
+              pwd: "{{ pwd }}"
+              photoId: "{{ imageId }}"
+            afterResponse: "genNewUserReply"    # capture result and store in file
+        count: "{{ numUsers }}"
