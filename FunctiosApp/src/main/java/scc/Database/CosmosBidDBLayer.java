@@ -4,19 +4,16 @@ import com.azure.cosmos.*;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
-import scc.Data.DAO.QuestionsDAO;
+import scc.Data.DAO.BidDAO;
 
-//same as CosmosBidDBLayer
-public class CosmosQuestionsDBLayer {
-
+public class CosmosBidDBLayer {
     private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");
     private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
     private static final String DB_NAME = System.getenv("COSMOSDB_DATABASE");
 
+    private static CosmosBidDBLayer instance;
 
-    private static CosmosQuestionsDBLayer instance;
-
-    public static synchronized CosmosQuestionsDBLayer getInstance() {
+    public static synchronized CosmosBidDBLayer getInstance() {
         if( instance != null)
             return instance;
 
@@ -30,15 +27,15 @@ public class CosmosQuestionsDBLayer {
                 .connectionSharingAcrossClientsEnabled(true)
                 .contentResponseOnWriteEnabled(true)
                 .buildClient();
-        instance = new CosmosQuestionsDBLayer( client);
+        instance = new CosmosBidDBLayer( client);
         return instance;
 
     }
     private CosmosClient client;
     private CosmosDatabase db;
-    private CosmosContainer questions;
+    private CosmosContainer bids;
 
-    public CosmosQuestionsDBLayer(CosmosClient client) {
+    public CosmosBidDBLayer(CosmosClient client) {
         this.client = client;
     }
 
@@ -46,30 +43,25 @@ public class CosmosQuestionsDBLayer {
         if( db != null)
             return;
         db = client.getDatabase(DB_NAME);
-        questions = db.getContainer("questions");
+        bids = db.getContainer("bid");
     }
 
-    public CosmosItemResponse<QuestionsDAO> putQuestion(QuestionsDAO question) {
+    public CosmosItemResponse<BidDAO> putBid(BidDAO bid) {
         init();
-        return questions.createItem(question);
+        return bids.createItem(bid);
     }
 
-    public CosmosPagedIterable<QuestionsDAO> getQuestionById(String userId,String auctionId,String questionId) {
+    public CosmosPagedIterable<BidDAO> getBids(String id) {
         init();
-        return questions.queryItems("SELECT * FROM questions q WHERE q.userId = '" + userId + "' AND q.auctionId = '" + auctionId + "' AND q.questionId = '" + questionId + "'", new CosmosQueryRequestOptions(), QuestionsDAO.class);
+        return bids.queryItems("SELECT * FROM bids b WHERE b.auctionId = '" + id + "'", new CosmosQueryRequestOptions(), BidDAO.class);
     }
 
-    public CosmosPagedIterable<QuestionsDAO> getQuestions(String auctionId) {
+   public CosmosPagedIterable<BidDAO> getBidById(String bidId, String auctionId) {
         init();
-        return questions.queryItems("SELECT * FROM questions q WHERE q.auctionId = '" + auctionId + "'", new CosmosQueryRequestOptions(), QuestionsDAO.class);
+        return bids.queryItems("SELECT * FROM bids b WHERE b.id = '" + bidId + "' AND b.auctionId = '" + auctionId + "'", new CosmosQueryRequestOptions(), BidDAO.class);
     }
     public void close() {
         client.close();
     }
 
-
-    public CosmosItemResponse<QuestionsDAO> replyQuestion(QuestionsDAO qu) {
-        init();
-        return questions.upsertItem(qu);
-    }
 }

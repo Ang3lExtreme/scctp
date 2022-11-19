@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.MediaType;
 public class MediaResource
 {
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=sccstwesteuropetp1;AccountKey=4980tpHibMsujSB1PjPqwoiN9XESMweJ3eOrHzA6p53URii/2O79OkZKh75/JClWR6/X2mB4qlpD+AStwAoiyw==;EndpointSuffix=core.windows.net";
+	String storageConnectionString = System.getenv("BlobStoreConnection");
 	BlobContainerClient containerClientImages = new BlobContainerClientBuilder()
                 .connectionString(storageConnectionString)
                 .containerName("images")
@@ -36,7 +36,7 @@ public class MediaResource
 
 
 	@POST
-	@Path("/images")
+	@Path("/")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response.Status UploadImages(byte[] data){
@@ -44,42 +44,26 @@ public class MediaResource
 		blob = containerClientImages.getBlobClient(filename);
 		blob.upload(BinaryData.fromBytes(data));
 		return Response.Status.ACCEPTED;
-		//devolver string
+
 	}
 
 	@GET
-	@Path("/images/{id}")
+	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public byte[] DownloadImages(@PathParam("id") String filename){
 		blob = containerClientImages.getBlobClient(filename);
+
+		//if blob does not exist throw error
+		if(!blob.exists()){
+			throw new WebApplicationException("Image does not exist", 404);
+		}
 
 		BinaryData data = blob.downloadContent();
 		byte[] arr = data.toBytes();
 		return arr;
 }
 
-	@POST
-	@Path("/videos")
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response.Status UploadVideos(byte[] data){
-		String filename = Hash.of(data);
-		blob = containerClientVideos.getBlobClient(filename);
-		blob.upload(BinaryData.fromBytes(data));
-		return Response.Status.ACCEPTED;
-		//devolver string
-	}
 
-	@GET
-	@Path("/videos/{id}")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public byte[] DownloadVideos(@PathParam("id") String filename){
-		blob = containerClientVideos.getBlobClient(filename);
-
-		BinaryData data = blob.downloadContent();
-		byte[] arr = data.toBytes();
-		return arr;
-	}
 
 
 

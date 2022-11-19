@@ -64,10 +64,10 @@ public class AzureManagement {
 	static final String AZURE_COSMOSDB_DATABASE = "scc23db" + MY_SUFFIX;	// Cosmos DB database name
 	static final String[] BLOB_CONTAINERS = { "images" };	// Containers to add to the blob storage
 	static final Region[] REGIONS = new Region[] { Region.EUROPE_WEST, Region.US_EAST}; // Define the regions to deploy resources here
-	
+
 	// Name of resoruce group for each region
 	static final String[] AZURE_RG_REGIONS = Arrays.stream(REGIONS)
-			.map(reg -> "scc23-rg-" + reg.name() + "-" + MY_SUFFIX).toArray(String[]::new);
+			.map(reg -> "scc23rg" + reg.name() + "" + MY_SUFFIX).toArray(String[]::new);
 
 	// Name of application server to be launched in each regions -- launching the application
 	// server must be done using mvn, as you have been doing
@@ -78,11 +78,11 @@ public class AzureManagement {
 	// Name of Blob storage account
 	static final String[] AZURE_STORAGE_NAME = Arrays.stream(REGIONS).map(reg -> "sccst" + reg.name() + MY_SUFFIX)
 			.toArray(String[]::new);
-	
+
 	// Name of Redis server to be defined
 	static final String[] AZURE_REDIS_NAME = Arrays.stream(REGIONS).map(reg -> "redis" + reg.name() + MY_SUFFIX)
 			.toArray(String[]::new);
-		
+
 	// Name of Azure functions to be launched in each regions
 	static final String[] AZURE_FUNCTIONS_NAME = Arrays.stream(REGIONS).map(reg -> "scc2223fun" + reg.name() + MY_SUFFIX)
 			.toArray(String[]::new);
@@ -90,12 +90,12 @@ public class AzureManagement {
 	// Name of property file with keys and URLS to access resources
 	static final String[] AZURE_PROPS_LOCATIONS = Arrays.stream(REGIONS)
 			.map(reg -> "azurekeys-" + reg.name() + ".props").toArray(String[]::new);
-	
+
 	// Name of shell script file with commands to set application setting for you application server
 	// and Azure functions
 	static final String[] AZURE_SETTINGS_LOCATIONS = Arrays.stream(REGIONS)
 			.map(reg -> "azureprops-" + reg.name() + ".sh").toArray(String[]::new);
-		
+
 	public static Azure createManagementClient(String authFile) throws CloudException, IOException {
 		File credFile = new File(authFile);
 		Azure azure = Azure.configure().withLogLevel(LogLevel.BASIC).authenticate(credFile).withDefaultSubscription();
@@ -125,7 +125,7 @@ public class AzureManagement {
 	}
 
 	private static BlobContainer createBlobContainer(Azure azure, String rgName, String accountName,
-			String containerName) {
+													 String containerName) {
 		BlobContainer container = azure.storageBlobContainers().defineContainer(containerName)
 				.withExistingBlobService(rgName, accountName).withPublicAccess(PublicAccess.BLOB).create();
 		System.out.println("Blob container created with success: name = " + containerName + " ; group = " + rgName
@@ -134,11 +134,11 @@ public class AzureManagement {
 	}
 
 	public synchronized static void recordStorageKey(Azure azure, String propFilename, String settingsFilename,
-			String functionsName, String functionsRGName, StorageAccount account) throws IOException {
+													 String functionsName, String functionsRGName, StorageAccount account) throws IOException {
 	}
 
 	public synchronized static void dumpStorageKey(Map<String, String> props, String propFilename,
-			String settingsFilename, String appName, String functionName, String rgName, StorageAccount account)
+												   String settingsFilename, String appName, String functionName, String rgName, StorageAccount account)
 			throws IOException {
 		List<StorageAccountKey> storageAccountKeys = account.getKeys();
 		storageAccountKeys = account.regenerateKey(storageAccountKeys.get(0).keyName());
@@ -209,8 +209,8 @@ public class AzureManagement {
 	}
 
 	public synchronized static void dumpCosmosDBKey(Map<String, String> props, String propFilename,
-			String settingsFilename, String appName, String functionName, String rgName, String databaseName,
-			CosmosDBAccount account) throws IOException {
+													String settingsFilename, String appName, String functionName, String rgName, String databaseName,
+													CosmosDBAccount account) throws IOException {
 		synchronized (AzureManagement.class) {
 			Files.write(Paths.get(propFilename),
 					("COSMOSDB_KEY=" + account.listKeys().primaryMasterKey() + "\n").getBytes(),
@@ -286,7 +286,7 @@ public class AzureManagement {
 	}
 
 	static void createCosmosCollection(CosmosClient client, String dbname, String collectionName, String partKeys,
-			String[] uniqueKeys) {
+									   String[] uniqueKeys) {
 		try {
 			System.out.println("Creating CosmosDB collection: name = " + collectionName + "@" + dbname);
 			CosmosDatabase db = client.getDatabase(dbname);
@@ -326,8 +326,8 @@ public class AzureManagement {
 		}
 	}
 
-	public synchronized static void dumpRedisCacheInfo(Map<String, String> props, String propFilename, 
-				String settingsFilename, String appName, String functionName, String rgName, RedisCache cache)
+	public synchronized static void dumpRedisCacheInfo(Map<String, String> props, String propFilename,
+													   String settingsFilename, String appName, String functionName, String rgName, RedisCache cache)
 			throws IOException {
 		RedisAccessKeys redisAccessKey = cache.regenerateKey(RedisKeyType.PRIMARY);
 		synchronized (AzureManagement.class) {
@@ -486,7 +486,7 @@ public class AzureManagement {
 							for (int i = 0; i < REGIONS.length; i++) {
 								RedisCache cache = createRedis(azure0, AZURE_RG_REGIONS[i], AZURE_REDIS_NAME[i],
 										REGIONS[i]);
-								dumpRedisCacheInfo(props.get(REGIONS[i].name()), AZURE_PROPS_LOCATIONS[i], 
+								dumpRedisCacheInfo(props.get(REGIONS[i].name()), AZURE_PROPS_LOCATIONS[i],
 										AZURE_SETTINGS_LOCATIONS[i], AZURE_APP_NAME[i], AZURE_FUNCTIONS_NAME[i],
 										AZURE_RG_REGIONS[i], cache);
 							}

@@ -73,6 +73,7 @@ public class AuctionController {
         //update auction
 
         CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
+
         if(!aucDB.iterator().hasNext()){
             throw new WebApplicationException("Auction dont exists", 404);
         }
