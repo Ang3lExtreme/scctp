@@ -54,9 +54,11 @@ public class CosmosQuestionsDBLayer {
         return questions.createItem(question);
     }
 
+
+
     public CosmosPagedIterable<QuestionsDAO> getQuestionById(String userId,String auctionId,String questionId) {
         init();
-        return questions.queryItems("SELECT * FROM questions q WHERE q.userId = '" + userId + "' AND q.auctionId = '" + auctionId + "' AND q.questionId = '" + questionId + "'", new CosmosQueryRequestOptions(), QuestionsDAO.class);
+        return questions.queryItems("SELECT * FROM questions q WHERE q.userId = '" + userId + "' AND q.auctionId = '" + auctionId + "' AND q.id = '" + questionId + "'", new CosmosQueryRequestOptions(), QuestionsDAO.class);
     }
 
     public CosmosPagedIterable<QuestionsDAO> getQuestions(String auctionId) {

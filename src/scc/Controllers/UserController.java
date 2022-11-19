@@ -12,12 +12,14 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import redis.clients.jedis.Jedis;
 import scc.Data.DAO.AuctionDAO;
+import scc.Data.DAO.BidDAO;
 import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Auction;
 import scc.Data.DTO.Login;
 import scc.Data.DTO.Session;
 import scc.Data.DTO.User;
 import scc.Database.CosmosAuctionDBLayer;
+import scc.Database.CosmosBidDBLayer;
 import scc.Database.CosmosUserDBLayer;
 import scc.cache.RedisCache;
 import scc.utils.Hash;
@@ -54,6 +56,9 @@ public class UserController {
 
     private CosmosUserDBLayer cosmos = new CosmosUserDBLayer(cosmosClient);
     private CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
+
+    private CosmosBidDBLayer cosmosBid = new CosmosBidDBLayer(cosmosClient);
+
 
     @POST
     @Path("/")
@@ -193,10 +198,10 @@ public class UserController {
     }
 
     @GET
-    @Path("/auctions/{id}")
+    @Path("/{id}/auctions")
     @Produces(MediaType.APPLICATION_JSON)
     //get auctions by user id
-    public List<Auction> getAuctionsByUser(@PathParam("id") String id) {
+    public List<Auction> getAuctionsOfUser(@PathParam("id") String id) {
         CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
 
         CosmosPagedIterable<AuctionDAO> auctions;
@@ -214,6 +219,64 @@ public class UserController {
         return auctionList;
 
     }
+
+    @GET
+    @Path("/{id}/auctions")
+    @Produces(MediaType.APPLICATION_JSON)
+    //get auctions by user id
+    public List<Auction> getOpenAuctionsOfUser(@PathParam("id") String id, @QueryParam("status") String status) {
+        CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
+
+        CosmosPagedIterable<AuctionDAO> auctions;
+        if(!user.iterator().hasNext()){
+            throw new WebApplicationException("User not found", 404);
+        } else {
+            auctions = cosmosAuction.getAuctionsOfUser(id);
+        }
+        //put auctions in list
+        List<Auction> auctionList = new ArrayList<>();
+        for(AuctionDAO auction : auctions){
+            if(status == "OPEN" && auction.getStatus().equals("OPEN")){
+                auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
+                        auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+            }
+        }
+        return auctionList;
+
+    }
+
+    @GET
+    @Path("/{id}/auctions/following")
+    @Produces(MediaType.APPLICATION_JSON)
+    //get auctions that user is following
+    public List<Auction> getAuctionsUserFollow(@PathParam("id") String id) {
+
+        CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
+
+        CosmosPagedIterable<BidDAO> bids;
+        if(!user.iterator().hasNext()){
+            throw new WebApplicationException("User not found", 404);
+        } else {
+            bids = cosmosBid.getBidsByUser(id);
+        }
+
+        //put auctions in list
+        List<Auction> auctionList = new ArrayList<>();
+        for(BidDAO bid : bids){
+            //get auction of bid
+            CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(bid.getAuctionId());
+            if(auction.iterator().hasNext()){
+                auctionList.add(new Auction(auction.iterator().next().getId(), auction.iterator().next().getTitle(), auction.iterator().next().getDescription(),
+                        auction.iterator().next().getImageId(), auction.iterator().next().getOwnerId(), auction.iterator().next().getEndTime().toString(), auction.iterator().next().getMinPrice(), auction.iterator().next().getWinnerId(), auction.iterator().next().getStatus()));
+            }
+        }
+        return auctionList;
+
+
+
+    }
+
+
 
     //authenticate user
 
