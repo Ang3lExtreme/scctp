@@ -64,6 +64,9 @@ public class BidController {
     public Bid createBid(@CookieParam("scc:session") Cookie session, Bid bid) throws JsonProcessingException {
         initCache();
         AuctionDAO auctionDAO;
+        if(!bid.getAuctionId().equals(id)) {
+            throw new WebApplicationException("Auction id does not match", 400);
+        }
         //create bid
         BidDAO b = new BidDAO(bid.getId(),bid.getAuctionId(), bid.getUserId(), bid.getValue());
 
@@ -75,11 +78,12 @@ public class BidController {
         if(!(USE_CACHE && jedis.exists("auc:" + id))) {
             //id auction dont exist
             CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
-            auctionDAO = auction.iterator().next();
-
             if (!auction.iterator().hasNext()) {
                 throw new WebApplicationException("Auction does not exist", 404);
             }
+            auctionDAO = auction.iterator().next();
+
+
         } else {
             String get = jedis.get("auc:" + id);
             ObjectMapper mapper = new ObjectMapper();

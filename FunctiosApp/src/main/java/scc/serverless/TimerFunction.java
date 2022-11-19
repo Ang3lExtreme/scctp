@@ -10,8 +10,11 @@ import com.azure.storage.blob.models.BlobItem;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.TimerTrigger;
 import scc.Data.DAO.AuctionDAO;
+import scc.Data.DAO.BidDAO;
 import scc.Data.DTO.Status;
 import scc.Database.CosmosAuctionDBLayer;
+import scc.Database.CosmosBidDBLayer;
+
 import java.util.Date;
 
 public class TimerFunction {
@@ -46,6 +49,49 @@ public class TimerFunction {
 
 		System.out.println("Timer trigger function executed at: " + timerInfo);
 		System.out.println("Closed " + counter + " auctions");
+	}
+
+	@FunctionName("DefineAuctionWinner")
+	//excecute every 5 minutes
+	public void defineAuctionWinner(@TimerTrigger(name = "timerInfo", schedule = "0 */5 * * * *") String timerInfo) {
+		//look for every auction that has expired and change its status to closed
+		//get all
+		CosmosClient cosmosClient = new CosmosClientBuilder()
+				.endpoint(System.getenv("COSMOSDB_URL"))
+				.key(System.getenv("COSMOSDB_KEY"))
+				.buildClient();
+
+		CosmosAuctionDBLayer cosmos =  new CosmosAuctionDBLayer(cosmosClient);
+		CosmosBidDBLayer cosmosBid = new CosmosBidDBLayer(cosmosClient);
+		CosmosPagedIterable<AuctionDAO> auctions = cosmos.getAuctions();
+		//for all auctions that are closed check all bids of the auction, and the one with the highest value is the winner
+		//update auction
+		int counter = 0;
+		for(AuctionDAO auction : auctions){
+			//parse AuctionDAO to Auction
+			if(auction.getStatus() == Status.CLOSED){
+
+				//get all bids of auction
+				//get highest bid
+				//set winner
+				//update auction
+				counter++;
+				CosmosPagedIterable<BidDAO> bis = cosmosBid.getBids(auction.getId());
+				BidDAO winner = null;
+				for(BidDAO bid : bis){
+					if(winner == null || bid.getValue() > winner.getValue()){
+						winner = bid;
+					}
+				}
+				if(winner != null){
+					auction.setWinnerId(winner.getUserId());
+					cosmos.updateAuction(auction);
+					System.out.println("Auction " + auction.getId() + " has a winner");
+				}
+				System.out.println("Auction " + auction.getId() + " has no winner");
+
+			}
+		}
 	}
 
 	@FunctionName("GarbageCollector")
