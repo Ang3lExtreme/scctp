@@ -136,7 +136,7 @@ public class AuctionController {
 
         if(USE_CACHE) {
             ObjectMapper mapper = new ObjectMapper();
-            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(newau));
+            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(auction));
         }
 
         return auction;
