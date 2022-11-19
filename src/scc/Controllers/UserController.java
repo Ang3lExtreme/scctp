@@ -221,7 +221,7 @@ public class UserController {
     }
 
     @GET
-    @Path("/{id}/auctions")
+    @Path("/{id}/auctionsopen")
     @Produces(MediaType.APPLICATION_JSON)
     //get auctions by user id
     public List<Auction> getOpenAuctionsOfUser(@PathParam("id") String id, @QueryParam("status") String status) {
