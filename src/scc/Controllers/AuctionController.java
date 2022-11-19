@@ -71,6 +71,7 @@ public class AuctionController {
     @Produces(MediaType.APPLICATION_JSON)
     public Auction updateAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Auction auction){
         //update auction
+
         CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
         if(!aucDB.iterator().hasNext()){
             throw new WebApplicationException("Auction dont exists", 404);
@@ -79,15 +80,16 @@ public class AuctionController {
         AuctionDAO au = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
                 auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(),auction.getStatus());
 
-        try {
-            Session.checkCookieUser(session, au.getOwnerId());
-        } catch (Exception e) {
-            throw new WebApplicationException(e.toString(), e.getCause());
-        }
+        AuctionDAO auc = aucDB.iterator().next();
 
-        verifyAuction(aucDB.iterator().next(), auction);
+        Session s = new Session();
+        String res = s.checkCookieUser(session, auc.getOwnerId());
+        if(!"ok".equals(res))
+            throw new WebApplicationException(res, Response.Status.UNAUTHORIZED);
 
+        verifyAuction(auc, auction);
         CosmosItemResponse<AuctionDAO> response = cosmos.updateAuction(au);
+
         return auction;
 
     }

@@ -32,8 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import static scc.mgt.AzureManagement.CREATE_REDIS;
-
 @Path("/user")
 public class UserController {
     private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");
@@ -180,6 +178,7 @@ public class UserController {
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response auth(Login login) throws NoSuchAlgorithmException, JsonProcessingException {
+        initCache();
         String user = login.getUser();
         String pwd = login.getPwd();
         if(user == null || user.equals("") || pwd == null || pwd.equals(""))
@@ -211,7 +210,7 @@ public class UserController {
 
         Session s = new Session(uid, user);
         ObjectMapper mapper = new ObjectMapper();
-        jedis.set("user:" + user, mapper.writeValueAsString(s));
+        jedis.set("user:" + u.getId(), mapper.writeValueAsString(s));
 
         return Response.ok().cookie(cookie).build();
 
