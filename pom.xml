@@ -144,7 +144,8 @@
         <configuration>
           <schemaVersion>V2</schemaVersion>
           <pricingTier>B1</pricingTier>
-          <region>westeurope</region>
+          <!--region>westeurope</region-->
+          <region>eastus</region>
           <runtime>
             <os>linux</os>
             <javaVersion>Java 17</javaVersion>
@@ -160,8 +161,10 @@
               </resource>
             </resources>
           </deployment>
-          <resourceGroup>scc23rgwesteurope51162</resourceGroup>
-          <appName>scc23appwesteurope51162</appName>
+          <!--resourceGroup>scc23rgeurope51162</resourceGroup>
+          <appName>scc23appwesteurope51162</appName-->
+          <resourceGroup>scc23rgeastus51162</resourceGroup>
+          <appName>scc23appeastus51162</appName>
         </configuration>
       </plugin>
     </plugins>

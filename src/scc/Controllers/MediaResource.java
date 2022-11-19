@@ -28,10 +28,7 @@ public class MediaResource
                 .containerName("images")
                 .buildClient();
 
-	BlobContainerClient containerClientVideos = new BlobContainerClientBuilder()
-			.connectionString(storageConnectionString)
-			.containerName("images")
-			.buildClient();
+
 	BlobClient blob;
 
 
