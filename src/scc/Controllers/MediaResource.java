@@ -32,16 +32,17 @@ public class MediaResource
 	BlobClient blob;
 
 
+	//upload image
 	@POST
 	@Path("/")
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Consumes(MediaType.MEDIA_TYPE_WILDCARD)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response.Status UploadImages(byte[] data){
+	public String UploadImages(byte[] data){
 		String filename = Hash.of(data);
 		blob = containerClientImages.getBlobClient(filename);
+		//upload images with hash as name
 		blob.upload(BinaryData.fromBytes(data));
-		return Response.Status.ACCEPTED;
-
+		return filename;
 	}
 
 	@GET

@@ -21,7 +21,7 @@ public class ControlResource
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String hello() {
-		return System.getenv().toString() + " v: 0001 " + CONNECTION_URL;
+		return "v: 0001 " ;
 	}
 
 }

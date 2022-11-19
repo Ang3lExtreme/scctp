@@ -4,10 +4,13 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import redis.clients.jedis.Jedis;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Auction;
@@ -15,11 +18,14 @@ import scc.Data.DTO.Session;
 import scc.Data.DTO.Status;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosUserDBLayer;
+import scc.cache.RedisCache;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import static scc.mgt.AzureManagement.USE_CACHE;
 
 //testing
 @Path("/auction")
@@ -27,11 +33,17 @@ public class AuctionController {
 
     private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");
     private static final String DB_KEY = System.getenv("COSMOSDB_KEY");
-
+    private Jedis jedis;
     CosmosClient cosmosClient = new CosmosClientBuilder()
             .endpoint(CONNECTION_URL)
             .key(DB_KEY)
             .buildClient();
+
+    private synchronized void initCache() {
+        if(jedis != null)
+            return;
+        jedis = RedisCache.getCachePool().getResource();
+    }
 
     CosmosAuctionDBLayer cosmos =  new CosmosAuctionDBLayer(cosmosClient);
     CosmosUserDBLayer cosmosUser = new CosmosUserDBLayer(cosmosClient);
@@ -69,19 +81,31 @@ public class AuctionController {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Auction updateAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Auction auction){
-        //update auction
+    public Auction updateAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Auction auction) throws JsonProcessingException {
+        initCache();
+        String key = "auc:" + auction.getAuctionId();
+        AuctionDAO auc = null;
 
-        CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
-
-        if(!aucDB.iterator().hasNext()){
-            throw new WebApplicationException("Auction dont exists", 404);
+        if(USE_CACHE) {
+            if(jedis.exists(key)) {
+                String s = jedis.get(key);
+                ObjectMapper mapper = new ObjectMapper();
+                auc = mapper.readValue(s, AuctionDAO.class);
+            }
         }
 
-        AuctionDAO au = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
-                auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(),auction.getStatus());
+        if(auc == null) {
+            CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
 
-        AuctionDAO auc = aucDB.iterator().next();
+            if (!aucDB.iterator().hasNext()) {
+                throw new WebApplicationException("Auction dont exists", 404);
+            }
+
+            auc = aucDB.iterator().next();
+        }
+
+        AuctionDAO newau = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
+                auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus());
 
         Session s = new Session();
         String res = s.checkCookieUser(session, auc.getOwnerId());
@@ -89,9 +113,15 @@ public class AuctionController {
             throw new WebApplicationException(res, Response.Status.UNAUTHORIZED);
 
         verifyAuction(auc, auction);
-        CosmosItemResponse<AuctionDAO> response = cosmos.updateAuction(au);
+        CosmosItemResponse<AuctionDAO> response = cosmos.updateAuction(newau);
+
+        if(USE_CACHE) {
+            ObjectMapper mapper = new ObjectMapper();
+            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(newau));
+        }
 
         return auction;
+
 
     }
 

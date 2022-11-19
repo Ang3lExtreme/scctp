@@ -12,7 +12,7 @@ import com.microsoft.azure.functions.*;
  */
 public class BlobStoreFunction
 {
-	@FunctionName("blobtest")
+	/*@FunctionName("blobtest")
 	public void setLastBlobInfo(@BlobTrigger(name = "blobtest", 
 									dataType = "binary", 
 									path = "images/{name}", 
@@ -25,6 +25,6 @@ public class BlobStoreFunction
 			jedis.set("serverless::blob::name",
 					"Blob name : " + blobname + " ; size = " + (content == null ? "0" : content.length));
 		}
-	}
+	}*/
 
 }
