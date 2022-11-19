@@ -8,7 +8,7 @@ private String auctionId;
     private String userId;
     private String message;
 
-    private String reply = "";
+    private String reply = null;
 
     public Questions(String id,String auctionId, String userId, String message) {
         super();
@@ -16,7 +16,15 @@ private String auctionId;
         this.auctionId = auctionId;
         this.userId = userId;
         this.message = message;
+    }
 
+    public Questions(String id,String auctionId, String userId, String message, String reply) {
+        super();
+        this.id = id;
+        this.auctionId = auctionId;
+        this.userId = userId;
+        this.message = message;
+        this.reply = reply;
     }
 
     public Questions(){}

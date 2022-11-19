@@ -46,6 +46,11 @@ public class QuestionController {
         if(!auction.iterator().hasNext()){
             throw new WebApplicationException("Auction does not exist", 404);
         }
+
+        //if auction is closed or deleted throw error
+        if(auction.iterator().next().getStatus().equals("CLOSED") || auction.iterator().next().getStatus().equals("DELETED")){
+            throw new WebApplicationException("Auction is closed or deleted", 409);
+        }
         //if user does not exist throw error
         CosmosPagedIterable<UserDAO> user = cosmosUser.getUserById(question.getUserId());
         if(!user.iterator().hasNext()){
@@ -88,8 +93,30 @@ public class QuestionController {
     @POST
     @Path("/{QuestionId}/reply")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Questions replyQuestion(@PathParam("QuestionId") String questionId, Reply reply){
        //TODO: reply to question
-        return null;
+
+        //if auction does not exist return 404
+        CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
+        if(!auction.iterator().hasNext()){
+            throw new WebApplicationException("Auction does not exist", 404);
+        }
+        //if question does not exist return 404
+        AuctionDAO auctionDAO = auction.iterator().next();
+        CosmosPagedIterable<QuestionsDAO> question = cosmos.getQuestionById(auctionDAO.getOwnerId(),id,questionId);
+        if(!question.iterator().hasNext()){
+            throw new WebApplicationException("Question does not exist", 404);
+        }
+        //if question already has a reply return 409
+        QuestionsDAO questionDAO = question.iterator().next();
+        if(questionDAO.getReply() != null){
+            throw new WebApplicationException("Question already has a reply", 409);
+        }
+
+        questionDAO.setReply(reply.getReply());
+        CosmosItemResponse<QuestionsDAO> response = cosmos.replyQuestion(questionDAO);
+        return new Questions(questionDAO.getId(),questionDAO.getAuctionId(), questionDAO.getUserId(), questionDAO.getMessage(), questionDAO.getReply());
+
     }
 }

@@ -10,7 +10,7 @@ public class QuestionsDAO {
     private String userId;
     private String message;
 
-    private String reply = "";
+    private String reply = null;
 
     public QuestionsDAO(String id, String auctionId, String userId, String message) {
         super();
