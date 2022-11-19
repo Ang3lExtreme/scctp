@@ -72,6 +72,7 @@ public class AuctionController {
     public Auction updateAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Auction auction){
         //update auction
         CosmosPagedIterable<AuctionDAO> aucDB = cosmos.getAuctionById(id);
+
         if(!aucDB.iterator().hasNext()){
             throw new WebApplicationException("Auction dont exists", 404);
         }
@@ -88,6 +89,7 @@ public class AuctionController {
         verifyAuction(aucDB.iterator().next(), auction);
 
         CosmosItemResponse<AuctionDAO> response = cosmos.updateAuction(au);
+
         return auction;
 
     }

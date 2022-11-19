@@ -1,33 +1,28 @@
 package scc.Data.DAO;
 
-import scc.Data.DTO.Questions;
+import scc.Data.DTO.Bid;
 
-public class QuestionsDAO {
+public class BidDAO {
     private String _rid;
     private String _ts;
     private String id;
     private String auctionId;
     private String userId;
-    private String message;
+    private float value;
 
-    private String reply = "";
-
-    public QuestionsDAO(String id, String auctionId, String userId, String message) {
+    public BidDAO(String id, String auctionId, String userId, float value) {
         super();
         this.id = id;
         this.auctionId = auctionId;
         this.userId = userId;
-        this.message = message;
-    }
-    //constructor that takes in a DTO
-    public QuestionsDAO(){
-
+        this.value = value;
     }
 
+    public BidDAO(){}
 
 
-    public QuestionsDAO(Questions q){
-        this(q.getId(),q.getAuctionId(), q.getUserId(), q.getMessage());
+    public BidDAO(Bid b){
+        this(b.getId(),b.getAuctionId(), b.getUserId(), b.getValue());
     }
 
     public String getId() {
@@ -36,6 +31,7 @@ public class QuestionsDAO {
     public void setId(String id) {
         this.id = id;
     }
+
     public String get_rid() {
         return _rid;
     }
@@ -68,19 +64,16 @@ public class QuestionsDAO {
         this.userId = userId;
     }
 
-    public String getMessage() {
-        return message;
+    public float getValue() {
+        return value;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setValue(float value) {
+        this.value = value;
     }
 
-    public String getReply() {
-        return reply;
-    }
 
-    public void setReply(String reply) {
-        this.reply = reply;
-    }
+
+
+
 }

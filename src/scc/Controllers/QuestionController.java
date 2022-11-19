@@ -10,6 +10,7 @@ import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.QuestionsDAO;
 import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Questions;
+import scc.Data.DTO.Reply;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosQuestionsDBLayer;
 import scc.Database.CosmosUserDBLayer;
@@ -36,7 +37,7 @@ public class QuestionController {
     private String id;
 
     @POST
-    @Path("/create")
+    @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Questions createQuestion(Questions question){
@@ -82,5 +83,13 @@ public class QuestionController {
         }
         return questions;
 
+    }
+
+    @POST
+    @Path("/{QuestionId}/reply")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Questions replyQuestion(@PathParam("QuestionId") String questionId, Reply reply){
+       //TODO: reply to question
+        return null;
     }
 }

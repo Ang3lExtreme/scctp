@@ -211,7 +211,7 @@ public class UserController {
 
         Session s = new Session(uid, user);
         ObjectMapper mapper = new ObjectMapper();
-        jedis.set("user:" + user, mapper.writeValueAsString(s));
+        jedis.set("user:" + u.getId(), mapper.writeValueAsString(s));
 
         return Response.ok().cookie(cookie).build();
 

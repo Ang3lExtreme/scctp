@@ -1,33 +1,22 @@
 package scc.Data.DTO;
 
 
-public class Questions {
+public class Bid {
 
     private String id;
-private String auctionId;
+    private String auctionId;
     private String userId;
-    private String message;
+    private float value;
 
-    private String reply = "";
-
-    public Questions(String id,String auctionId, String userId, String message) {
+    public Bid(String id,String auctionId, String userId, float value) {
         super();
         this.id = id;
         this.auctionId = auctionId;
         this.userId = userId;
-        this.message = message;
-
+        this.value = value;
     }
 
-    public Questions(){}
-
-    public String getReply() {
-        return reply;
-    }
-
-    public void setReply(String reply) {
-        this.reply = reply;
-    }
+    public Bid(){}
 
     public String getId() {
         return id;
@@ -52,11 +41,11 @@ private String auctionId;
         this.userId = userId;
     }
 
-    public String getMessage() {
-        return message;
+    public float getValue() {
+        return value;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setValue(float value) {
+        this.value = value;
     }
 }

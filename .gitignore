@@ -31,3 +31,14 @@ hs_err_pid*
 /azure.auth
 /azurekeys-westeurope.props
 /azureprops-westeurope.sh
+
+/FunctiosApp/target/*
+/FunctiosApp/.settings/*
+/FunctiosApp/.idea/*
+/FunctiosApp/azure.auth
+/FunctiosApp/azurekeys-westeurope.props
+/FunctiosApp/azureprops-westeurope.sh
+/FunctiosApp/azurekeys-westeurope.props
+/FunctiosApp/azureprops-westeurope.sh
+/FunctiosApp/azurekeys-eastus.props
+/FunctiosApp/azureprops-eastus.sh
