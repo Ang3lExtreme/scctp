@@ -53,6 +53,7 @@ public class AuctionController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Auction createAuction(@CookieParam("scc:session") Cookie session, Auction auction) throws JsonProcessingException {
+        initCache();
         //create a AuctionDAO object
         AuctionDAO au = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
                 auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice());
@@ -148,6 +149,7 @@ public class AuctionController {
     @Path("/auctionsToClose")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Auction> getAuctionsToClose() throws JsonProcessingException {
+        initCache();
         List<Auction> auctionList = new ArrayList<>();
         String key = "AuctionsToClose";
 

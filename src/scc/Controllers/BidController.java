@@ -5,8 +5,11 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import redis.clients.jedis.Jedis;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.BidDAO;
 import scc.Data.DAO.QuestionsDAO;
@@ -18,11 +21,14 @@ import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosBidDBLayer;
 import scc.Database.CosmosQuestionsDBLayer;
 import scc.Database.CosmosUserDBLayer;
+import scc.cache.RedisCache;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import static scc.mgt.AzureManagement.USE_CACHE;
 
 @Path("/auction/{id}/bid")
 public class BidController {
@@ -36,6 +42,13 @@ public class BidController {
             .key(DB_KEY)
             .buildClient();
 
+    private Jedis jedis;
+    private synchronized void initCache() {
+        if(jedis != null)
+            return;
+        jedis = RedisCache.getCachePool().getResource();
+    }
+
     CosmosBidDBLayer cosmos =  new CosmosBidDBLayer(cosmosClient);
     CosmosAuctionDBLayer cosmosAuction = new CosmosAuctionDBLayer(cosmosClient);
 
@@ -45,42 +58,57 @@ public class BidController {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Bid createBid(Bid bid) {
+    public Bid createBid(Bid bid) throws JsonProcessingException {
+        initCache();
+        AuctionDAO auctionDAO;
         //create bid
         BidDAO b = new BidDAO(bid.getId(),bid.getAuctionId(), bid.getUserId(), bid.getValue());
 
-        //id auction dont exist
-        CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
+        if(!(USE_CACHE && jedis.exists("auc:" + id))) {
+            //id auction dont exist
+            CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
+            auctionDAO = auction.iterator().next();
 
-        if(!auction.iterator().hasNext()){
-            throw new WebApplicationException("Auction does not exist", 404);
+            if (!auction.iterator().hasNext()) {
+                throw new WebApplicationException("Auction does not exist", 404);
+            }
+        } else {
+            String get = jedis.get("auc:" + id);
+            ObjectMapper mapper = new ObjectMapper();
+            Auction auction = mapper.readValue(get, Auction.class);
+            auctionDAO = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
+                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus());
         }
 
-       auction = cosmosAuction.getAuctionById(b.getAuctionId());
-
-        if(!auction.iterator().hasNext()){
-            throw new WebApplicationException("Auction does not exist", 404);
-        }
-
-        //check if user is exist
-        CosmosPagedIterable<UserDAO> auctionDAO = cosmosUser.getUserById(b.getUserId());
-        if(!auctionDAO.iterator().hasNext()){
-            throw new WebApplicationException("User does not exist", 404);
+        if(!(USE_CACHE && jedis.exists("user:" + b.getUserId()))) {
+            //check if user is exist
+            CosmosPagedIterable<UserDAO> userDAO = cosmosUser.getUserById(b.getUserId());
+            if (!userDAO.iterator().hasNext()) {
+                throw new WebApplicationException("User does not exist", 404);
+            }
         }
 
         //make AuctionDAO to AuctionDTO
-        Auction auctionDTO = new Auction(auction.iterator().next().getId(), auction.iterator().next().getTitle(), auction.iterator().next().getDescription(),
-                auction.iterator().next().getImageId(), auction.iterator().next().getOwnerId(), auction.iterator().next().getEndTime().toString(), auction.iterator().next().getMinPrice());
+        Auction auctionDTO = new Auction(auctionDAO.getId(), auctionDAO.getTitle(), auctionDAO.getDescription(),
+                auctionDAO.getImageId(), auctionDAO.getOwnerId(), auctionDAO.getEndTime().toString(), auctionDAO.getMinPrice());
 
-        //if bid exists, return error
-        CosmosPagedIterable<BidDAO> bidDAO = cosmos.getBidById(bid.getId(),bid.getAuctionId());
-        if(bidDAO.iterator().hasNext()){
-            throw new WebApplicationException("Bid already exists", 409);
+        if(!(USE_CACHE && jedis.exists("bid:" + bid.getId()))) {
+            //if bid exists, return error
+            CosmosPagedIterable<BidDAO> bidDAO = cosmos.getBidById(bid.getId(), bid.getAuctionId());
+            if (bidDAO.iterator().hasNext()) {
+                throw new WebApplicationException("Bid already exists", 409);
+            }
         }
 
         verifyBid(auctionDTO,bid);
 
         CosmosItemResponse<BidDAO> response = cosmos.putBid(b);
+
+        if(USE_CACHE) {
+            ObjectMapper mapper = new ObjectMapper();
+            jedis.set("bid:" + bid.getId(), mapper.writeValueAsString(bid));
+        }
+
         return bid;
     }
 

@@ -65,6 +65,7 @@ public class UserController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public User writeUser(User user) throws NoSuchAlgorithmException, JsonProcessingException {
+        initCache();
         String userk = "user:" + user.getId();
 
         if(USE_CACHE && jedis.exists(userk))
@@ -106,6 +107,7 @@ public class UserController {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public User getUser(@PathParam("id") String id) throws JsonProcessingException {
+        initCache();
         String userk = "user:" + id;
         User u;
 
@@ -133,20 +135,27 @@ public class UserController {
     @DELETE()
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public CosmosPagedIterable<UserDAO> delUser(@PathParam("id") String id) throws JsonProcessingException {
-        String userk = "user:" + id;
+    public CosmosPagedIterable<UserDAO> delUser(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
+        initCache();
+        CosmosPagedIterable<UserDAO> user = null;
+        Session s = new Session();
+        if("ok".equals(s.checkCookieUser(session, id))) {
+            jedis.del("scc:session" + id);
+            String userk = "user:" + id;
 
-        if(USE_CACHE && jedis.exists(userk)) {
-            jedis.del(userk);
+            if (USE_CACHE && jedis.exists(userk)) {
+                jedis.del(userk);
+            } else {
+
+                user = cosmos.getUserById(id);
+
+                if (!user.iterator().hasNext()) {
+                    throw new WebApplicationException("User not found", 404);
+                }
+            }
+            //else delete user
+            CosmosItemResponse<Object> response = cosmos.delUserById(id);
         }
-
-        CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
-
-        if(!user.iterator().hasNext()){
-            throw new WebApplicationException("User not found", 404);
-        }
-        //else delete user
-        CosmosItemResponse<Object> response = cosmos.delUserById(id);
         return user;
     }
 
@@ -155,6 +164,7 @@ public class UserController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
       public User updateUser(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, User user) throws NoSuchAlgorithmException, JsonProcessingException {
+        initCache();
         Session s = new Session();
         String res = s.checkCookieUser(session, user.getId());
         if(!"ok".equals(res))
