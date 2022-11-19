@@ -7,19 +7,12 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
-import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.TimerTrigger;
-import redis.clients.jedis.Jedis;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DTO.Status;
 import scc.Database.CosmosAuctionDBLayer;
-import scc.cache.RedisCache;
-
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TimerFunction {
 

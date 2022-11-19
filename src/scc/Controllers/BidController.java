@@ -125,27 +125,6 @@ public class BidController {
 
     }
 
-   /* @GET()
-    @Path("/last")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Bid getLastBidd(String auctionId){
-        //get last bid created transforming _ts to date
-        CosmosPagedIterable<BidDAO> bids = cosmos.getBids(id);
-        BidDAO lastBid = null;
-        for (BidDAO bid : bids) {
-            if(lastBid == null){
-                lastBid = bid;
-            }else{
-                if(Integer.parseInt(bid.get_ts()) > Integer.parseInt(lastBid.get_ts())){
-                    lastBid =bid;
-                }
-            }
-        }
-
-        Bid bid = new Bid(lastBid.getId(), lastBid.getAuctionId(), lastBid.getUserId(), lastBid.getValue());
-        return bid;
-    }*/
-
     //return bid that have lowest _ts
     private Bid getLastBid(){
 
