@@ -8,7 +8,7 @@ public class Bid {
     private String userId;
     private float value;
 
-    public Bid(String id,String auctionId, String userId, float value) {
+    public Bid(String id, String auctionId, String userId, float value) {
         super();
         this.id = id;
         this.auctionId = auctionId;
