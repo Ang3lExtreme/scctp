@@ -224,7 +224,7 @@ public class UserController {
         List<Auction> auctionList = new ArrayList<>();
         for(AuctionDAO auction : auctions){
             auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
-                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
         }
         return auctionList;
 
@@ -248,7 +248,7 @@ public class UserController {
         for(AuctionDAO auction : auctions){
             if(status == "OPEN" && auction.getStatus().equals("OPEN")){
                 auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
-                        auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+                        auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
             }
         }
         return auctionList;
@@ -277,7 +277,7 @@ public class UserController {
             CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(bid.getAuctionId());
             if(auction.iterator().hasNext()){
                 auctionList.add(new Auction(auction.iterator().next().getId(), auction.iterator().next().getTitle(), auction.iterator().next().getDescription(),
-                        auction.iterator().next().getImageId(), auction.iterator().next().getOwnerId(), auction.iterator().next().getEndTime().toString(), auction.iterator().next().getMinPrice(), auction.iterator().next().getWinnerId(), auction.iterator().next().getStatus()));
+                        auction.iterator().next().getImageId(), auction.iterator().next().getOwnerId(), auction.iterator().next().getEndTime(), auction.iterator().next().getMinPrice(), auction.iterator().next().getWinnerId(), auction.iterator().next().getStatus()));
             }
         }
         return auctionList;

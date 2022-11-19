@@ -68,7 +68,7 @@ public class BidController {
             throw new WebApplicationException("Auction id does not match", 400);
         }
         //create bid
-        BidDAO b = new BidDAO(bid.getId(),bid.getAuctionId(), bid.getUserId(), bid.getValue());
+        BidDAO b = new BidDAO(bid.getId(),bid.getAuctionId(), bid.getUserId(), bid.getTime(),bid.getValue());
 
         Session s = new Session();
         String res = s.checkCookieUser(session, bid.getUserId());
@@ -102,7 +102,7 @@ public class BidController {
 
         //make AuctionDAO to AuctionDTO
         Auction auctionDTO = new Auction(auctionDAO.getId(), auctionDAO.getTitle(), auctionDAO.getDescription(),
-                auctionDAO.getImageId(), auctionDAO.getOwnerId(), auctionDAO.getEndTime().toString(), auctionDAO.getMinPrice());
+                auctionDAO.getImageId(), auctionDAO.getOwnerId(), auctionDAO.getEndTime(), auctionDAO.getMinPrice());
 
         if(!(USE_CACHE && jedis.exists("bid:" + bid.getId()))) {
             //if bid exists, return error
@@ -138,7 +138,7 @@ public class BidController {
 
         List<Bid> bidList = new ArrayList<>();
         for (BidDAO bid : bids) {
-            bidList.add(new Bid(bid.getId(), bid.getAuctionId(), bid.getUserId(), bid.getValue()));
+            bidList.add(new Bid(bid.getId(), bid.getAuctionId(), bid.getUserId(), bid.getTime(),bid.getValue()));
         }
         return bidList;
     }
@@ -184,7 +184,7 @@ public class BidController {
             return null;
         }
 
-        Bid bid = new Bid(lastBid.getId(), lastBid.getAuctionId(), lastBid.getUserId(), lastBid.getValue());
+        Bid bid = new Bid(lastBid.getId(), lastBid.getAuctionId(), lastBid.getUserId(),new Date(),lastBid.getValue());
         return bid;
 
     }

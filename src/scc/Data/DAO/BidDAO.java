@@ -1,6 +1,9 @@
 package scc.Data.DAO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import scc.Data.DTO.Bid;
+
+import java.util.Date;
 
 public class BidDAO {
     private String _rid;
@@ -10,19 +13,23 @@ public class BidDAO {
     private String userId;
     private float value;
 
-    public BidDAO(String id, String auctionId, String userId, float value) {
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    private Date time;
+
+    public BidDAO(String id, String auctionId, String userId, Date time ,float value) {
         super();
         this.id = id;
         this.auctionId = auctionId;
         this.userId = userId;
         this.value = value;
+        this.time = time;
     }
 
     public BidDAO(){}
 
 
     public BidDAO(Bid b){
-        this(b.getId(),b.getAuctionId(), b.getUserId(), b.getValue());
+        this(b.getId(),b.getAuctionId(), b.getUserId(), b.getTime(),b.getValue());
     }
 
     public String getId() {
@@ -70,6 +77,14 @@ public class BidDAO {
 
     public void setValue(float value) {
         this.value = value;
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
     }
 
 

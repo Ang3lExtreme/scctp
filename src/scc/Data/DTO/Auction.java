@@ -1,5 +1,7 @@
 package scc.Data.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 public class Auction {
@@ -8,12 +10,13 @@ public class Auction {
     private String description;
     private String imageId;
     private String ownerId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
     private Date endTime;
     private float minPrice;
     private String winnerId = null;
     private Status status = Status.OPEN;
 
-    public Auction(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
+    public Auction(String id, String title, String description, String imageId, String ownerId, Date endTime, float minPrice) {
         super();
         this.id = id;
         this.title = title;
@@ -21,18 +24,18 @@ public class Auction {
         this.imageId = imageId;
         this.ownerId = ownerId;
         //parse endTime to Date
-        this.endTime = new Date(endTime);
+        this.endTime = endTime;
         this.minPrice = minPrice;
 
     }
     //constructor including winnerId and status
-    public Auction(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice, String winnerId, Status status) {
+    public Auction(String id, String title, String description, String imageId, String ownerId, Date endTime, float minPrice, String winnerId, Status status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.imageId = imageId;
         this.ownerId = ownerId;
-        this.endTime = new Date(endTime);
+        this.endTime = endTime;
         this.minPrice = minPrice;
         this.winnerId = winnerId;
         this.status = status;

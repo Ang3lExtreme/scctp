@@ -1,5 +1,6 @@
 package scc.Data.DAO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import scc.Data.DTO.Auction;
 import scc.Data.DTO.Status;
 
@@ -14,6 +15,8 @@ public class AuctionDAO {
     private String description;
     private String imageId;
     private String ownerId;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
     private Date endTime;
     private float minPrice;
     private String winnerId = null;

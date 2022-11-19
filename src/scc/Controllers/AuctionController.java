@@ -163,7 +163,7 @@ public class AuctionController {
 
             for(AuctionDAO auction : auctions){
                 auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
-                        auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+                        auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
             }
         }
 
