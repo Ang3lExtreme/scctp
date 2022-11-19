@@ -8,7 +8,9 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import redis.clients.jedis.Jedis;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.BidDAO;
@@ -17,6 +19,7 @@ import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Auction;
 import scc.Data.DTO.Bid;
 import scc.Data.DTO.Questions;
+import scc.Data.DTO.Session;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosBidDBLayer;
 import scc.Database.CosmosQuestionsDBLayer;
@@ -58,11 +61,16 @@ public class BidController {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Bid createBid(Bid bid) throws JsonProcessingException {
+    public Bid createBid(@CookieParam("scc:session") Cookie session, Bid bid) throws JsonProcessingException {
         initCache();
         AuctionDAO auctionDAO;
         //create bid
         BidDAO b = new BidDAO(bid.getId(),bid.getAuctionId(), bid.getUserId(), bid.getValue());
+
+        Session s = new Session();
+        String res = s.checkCookieUser(session, bid.getUserId());
+        if(!"ok".equals(res))
+            throw new WebApplicationException(res, Response.Status.UNAUTHORIZED);
 
         if(!(USE_CACHE && jedis.exists("auc:" + id))) {
             //id auction dont exist

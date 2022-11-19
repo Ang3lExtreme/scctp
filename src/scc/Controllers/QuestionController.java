@@ -7,7 +7,9 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import redis.clients.jedis.Jedis;
 import scc.Data.DAO.AuctionDAO;
 import scc.Data.DAO.QuestionsDAO;
@@ -15,6 +17,7 @@ import scc.Data.DAO.UserDAO;
 import scc.Data.DTO.Auction;
 import scc.Data.DTO.Questions;
 import scc.Data.DTO.Reply;
+import scc.Data.DTO.Session;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosQuestionsDBLayer;
 import scc.Database.CosmosUserDBLayer;
@@ -121,7 +124,7 @@ public class QuestionController {
     @Path("/{QuestionId}/reply")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Questions replyQuestion(@PathParam("QuestionId") String questionId, Reply reply) throws JsonProcessingException {
+    public Questions replyQuestion(@CookieParam("scc:session") Cookie session, @PathParam("QuestionId") String questionId, Reply reply) throws JsonProcessingException {
         initCache();
        //TODO: reply to question
         AuctionDAO auctionDAO;
@@ -141,6 +144,12 @@ public class QuestionController {
             auctionDAO = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
                     auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus());
         }
+
+        Session s = new Session();
+        String res = s.checkCookieUser(session, auctionDAO.getOwnerId());
+        if(!"ok".equals(res))
+            throw new WebApplicationException(res, Response.Status.UNAUTHORIZED);
+
         if(!(USE_CACHE && jedis.exists("quest:" + questionId))) {
             //if question does not exist return 404
             CosmosPagedIterable<QuestionsDAO> question = cosmos.getQuestionById(auctionDAO.getOwnerId(), id, questionId);
