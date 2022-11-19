@@ -6,6 +6,7 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
@@ -58,12 +59,16 @@ public class UserController {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public User writeUser(User user) throws NoSuchAlgorithmException {
+    public User writeUser(User user) throws NoSuchAlgorithmException, JsonProcessingException {
+        String userk = "user:" + user.getId();
+
+        if(USE_CACHE && jedis.exists(userk))
+            throw new WebApplicationException("User already exists", 409);
 
         //get user first by id
         CosmosPagedIterable<UserDAO> userDAO = cosmos.getUserById(user.getId());
         //if user exists, return error
-        if(userDAO.iterator().hasNext()){
+        if (userDAO.iterator().hasNext()) {
             throw new WebApplicationException("User already exists", 409);
         }
 
@@ -82,6 +87,11 @@ public class UserController {
 
         CosmosItemResponse<UserDAO> response = cosmos.putUser(u);
 
+        if(USE_CACHE) {
+            ObjectMapper mapper = new ObjectMapper();
+            jedis.set(userk, mapper.writeValueAsString(user));
+        }
+
         return user;
 
     }
@@ -90,14 +100,27 @@ public class UserController {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public User getUser(@PathParam("id") String id) {
-        CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
-        if(!user.iterator().hasNext()){
-            throw new WebApplicationException("User not found", 404);
+    public User getUser(@PathParam("id") String id) throws JsonProcessingException {
+        String userk = "user:" + id;
+        User u;
+
+        if(USE_CACHE && jedis.exists(userk)) {
+            ObjectMapper mapper = new ObjectMapper();
+            u = mapper.readValue(jedis.get(userk), User.class);
+        } else {
+            CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
+            if (!user.iterator().hasNext()) {
+                throw new WebApplicationException("User not found", 404);
+            }
+
+            UserDAO userDAO = user.iterator().next();
+            u = new User(userDAO.getId(), userDAO.getName(), userDAO.getNickname(), userDAO.getPwd(), userDAO.getPhotoId());
         }
 
-        UserDAO userDAO = user.iterator().next();
-        User u = new User(userDAO.getId(), userDAO.getName(), userDAO.getNickname(), userDAO.getPwd(), userDAO.getPhotoId());
+        if(USE_CACHE) {
+            ObjectMapper mapper = new ObjectMapper();
+            jedis.set(userk, mapper.writeValueAsString(u));
+        }
 
         return u;
     }
@@ -105,7 +128,13 @@ public class UserController {
     @DELETE()
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public CosmosPagedIterable<UserDAO> delUser(@PathParam("id") String id) {
+    public CosmosPagedIterable<UserDAO> delUser(@PathParam("id") String id) throws JsonProcessingException {
+        String userk = "user:" + id;
+
+        if(USE_CACHE && jedis.exists(userk)) {
+            jedis.del(userk);
+        }
+
         CosmosPagedIterable<UserDAO> user = cosmos.getUserById(id);
 
         if(!user.iterator().hasNext()){
@@ -120,21 +149,35 @@ public class UserController {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-      public User updateUser(@PathParam("id") String id, User user) throws NoSuchAlgorithmException {
+      public User updateUser(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, User user) throws NoSuchAlgorithmException, JsonProcessingException {
+        Session s = new Session();
+        String res = s.checkCookieUser(session, user.getId());
+        if(!"ok".equals(res))
+            throw new WebApplicationException(res, Response.Status.UNAUTHORIZED);
+
+        String userk = "user:" + id;
+        User u;
+        if(USE_CACHE && jedis.exists(userk)) {
+            ObjectMapper mapper = new ObjectMapper();
+            u = mapper.readValue(jedis.get(userk), User.class);
+        } else {
             CosmosPagedIterable<UserDAO> userDB = cosmos.getUserById(id);
 
-        if(!userDB.iterator().hasNext()){
-            throw new WebApplicationException("User not found", 404);
+            if (!userDB.iterator().hasNext()) {
+                throw new WebApplicationException("User not found", 404);
+            }
+
+            UserDAO udao = userDB.iterator().next();
+            u = new User(udao.getId(), udao.getName(), udao.getNickname(), udao.getPwd(), udao.getPhotoId());
         }
 
         //if User user have different nickname, check if nickname is already taken
-        if(!userDB.iterator().next().getNickname().equals(user.getNickname())){
+        if(!u.getNickname().equals(user.getNickname())){
             CosmosPagedIterable<UserDAO> userDAO2 = cosmos.getUserByNickname(user.getNickname());
             if(userDAO2.iterator().hasNext()){
                 throw new WebApplicationException("Nickname already exists", 409);
             }
         }
-
 
         MessageDigest messageDigest = MessageDigest.getInstance(HASHCODE);
         messageDigest.update(user.getPwd().getBytes());
@@ -142,12 +185,12 @@ public class UserController {
         String passHashed = new String(messageDigest.digest());
         user.setPwd(passHashed);
 
-        UserDAO u = new UserDAO(user.getId(), user.getName(), user.getNickname(),user.getPwd(), user.getPhotoId());
+        UserDAO udao2 = new UserDAO(user.getId(), user.getName(), user.getNickname(),user.getPwd(), user.getPhotoId());
 
-        CosmosItemResponse<UserDAO> response = cosmos.updateUser(u);
+        CosmosItemResponse<UserDAO> response = cosmos.updateUser(udao2);
 
-            return user;
-        }
+        return user;
+    }
 
     @GET
     @Path("/auctions/{id}")
@@ -183,7 +226,6 @@ public class UserController {
         String pwd = login.getPwd();
         if(user == null || user.equals("") || pwd == null || pwd.equals(""))
             return Response.status(NO_CONTENT).entity("Invalid user login").build();
-        initCache();
         CosmosPagedIterable<UserDAO> userDB = cosmos.getUserByNickname(user);
         if(!userDB.iterator().hasNext()){
             return Response.status(NOT_FOUND).entity("User not found").build();
@@ -210,7 +252,7 @@ public class UserController {
 
         Session s = new Session(uid, user);
         ObjectMapper mapper = new ObjectMapper();
-        jedis.set("user:" + u.getId(), mapper.writeValueAsString(s));
+        jedis.set("userSession:" + u.getId(), mapper.writeValueAsString(s));
 
         return Response.ok().cookie(cookie).build();
 

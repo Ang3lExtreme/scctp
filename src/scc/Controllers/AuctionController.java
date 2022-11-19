@@ -52,7 +52,7 @@ public class AuctionController {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Auction createAuction(Auction auction){
+    public Auction createAuction(@CookieParam("scc:session") Cookie session, Auction auction) throws JsonProcessingException {
         //create a AuctionDAO object
         AuctionDAO au = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
                 auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice());
@@ -62,18 +62,36 @@ public class AuctionController {
             throw new WebApplicationException("Cannot create auction in this time" , 409);
         }
 
-        CosmosPagedIterable<UserDAO> user = cosmosUser.getUserById(auction.getOwnerId());
-        if(!user.iterator().hasNext()){
-            throw new WebApplicationException("Owner does not exist", 404);
+        Session s = new Session();
+        String res = s.checkCookieUser(session, auction.getOwnerId());
+        if(!"ok".equals(res))
+            throw new WebApplicationException(res, Response.Status.UNAUTHORIZED);
+
+        String auk = "auc:" + auction.getAuctionId();
+        String userk = "user:" + auction.getOwnerId();
+
+        if(!(USE_CACHE && jedis.exists(userk))) {
+            CosmosPagedIterable<UserDAO> user = cosmosUser.getUserById(auction.getOwnerId());
+            if (!user.iterator().hasNext()) {
+                throw new WebApplicationException("Owner does not exist", 404);
+            }
         }
 
-        //if auction exists, return error
-        CosmosPagedIterable<AuctionDAO> auctionDAO = cosmos.getAuctionById(auction.getAuctionId());
-        if(auctionDAO.iterator().hasNext()){
+        if(!(USE_CACHE && jedis.exists(auk))) {
+            CosmosPagedIterable<AuctionDAO> auctionDAO = cosmos.getAuctionById(auction.getAuctionId());
+            if (auctionDAO.iterator().hasNext()) {
+                throw new WebApplicationException("Auction already exists", 409);
+            }
+        } else
             throw new WebApplicationException("Auction already exists", 409);
-        }
 
         CosmosItemResponse<AuctionDAO> response = cosmos.putAuction(au);
+
+        if(USE_CACHE) {
+            ObjectMapper mapper = new ObjectMapper();
+            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(auction));
+        }
+
         return auction;
     }
 
@@ -129,14 +147,26 @@ public class AuctionController {
     @GET()
     @Path("/auctionsToClose")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Auction> getAuctionsToClose(){
-        //get auctions to close
-        CosmosPagedIterable<AuctionDAO> auctions = cosmos.getAuctionsToClose();
+    public List<Auction> getAuctionsToClose() throws JsonProcessingException {
         List<Auction> auctionList = new ArrayList<>();
-        for(AuctionDAO auction : auctions){
-            auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
-                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+        String key = "AuctionsToClose";
+
+        if(USE_CACHE && jedis.exists(key)) {
+            String s = jedis.get(key);
+            ObjectMapper mapper = new ObjectMapper();
+            auctionList = mapper.readValue(s, List.class);
+        } else {
+            //get auctions to close
+            CosmosPagedIterable<AuctionDAO> auctions = cosmos.getAuctionsToClose();
+
+            for(AuctionDAO auction : auctions){
+                auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
+                        auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+            }
         }
+
+        //if USE_CACHE==true put auctionstoclose in cache with timetrigger
+
         //convert to Auction
         return auctionList;
 

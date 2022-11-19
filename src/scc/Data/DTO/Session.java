@@ -37,8 +37,8 @@ public class Session {
 
         Session s=null;
         try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-            if(jedis.exists("user:"+id)) {
-                String logged = jedis.get("user:" + id);
+            if(jedis.exists("userSession:"+id)) {
+                String logged = jedis.get("userSession:" + id);
                 ObjectMapper mapper = new ObjectMapper();
                 s = mapper.readValue(logged, Session.class);
             }
