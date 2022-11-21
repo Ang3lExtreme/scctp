@@ -25,9 +25,9 @@ public class AuctionDAO {
     public AuctionDAO() {
     }
     public AuctionDAO( Auction a) {
-        this(a.getAuctionId(), a.getTitle(), a.getDescription(),a.getImageId(), a.getOwnerId(), a.getEndTime().toString(), a.getMinPrice());
+        this(a.getAuctionId(), a.getTitle(), a.getDescription(),a.getImageId(), a.getOwnerId(), a.getEndTime(), a.getMinPrice());
     }
-    public AuctionDAO(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice) {
+    public AuctionDAO(String id, String title, String description, String imageId, String ownerId, Date endTime, float minPrice) {
         super();
         this.id = id;
         this.title = title;
@@ -35,18 +35,19 @@ public class AuctionDAO {
         this.imageId = imageId;
         this.ownerId = ownerId;
         //parse endTime to Date
-        this.endTime = new Date(endTime);
+        this.endTime = endTime;
         this.minPrice = minPrice;
 
     }
     //constructor including winnerId and status
-    public AuctionDAO(String id, String title, String description, String imageId, String ownerId, String endTime, float minPrice, String winnerId, Status status) {
+    public AuctionDAO(String id, String title, String description, String imageId, String ownerId, Date endTime, float minPrice, String winnerId, Status status) {
+        super();
         this.id = id;
         this.title = title;
         this.description = description;
         this.imageId = imageId;
         this.ownerId = ownerId;
-        this.endTime = new Date(endTime);
+        this.endTime = endTime;
         this.minPrice = minPrice;
         this.winnerId = winnerId;
         this.status = status;

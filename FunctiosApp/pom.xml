@@ -12,14 +12,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
-         <functionAppName>scc2223funwesteurope51162</functionAppName>
+         <!--functionAppName>scc2223funwesteurope51162</functionAppName>
         <functionAppRegion>westeurope</functionAppRegion>
         <functionPricingTier>B1</functionPricingTier>
-        <functionResourceGroup>scc23rgwesteurope51162</functionResourceGroup>
-        <!--functionAppName>scc2223funeastus51162</functionAppName>
+        <functionResourceGroup>scc23rgwesteurope51162</functionResourceGroup-->
+        <functionAppName>scc2223funeastus51162</functionAppName>
         <functionAppRegion>eastus</functionAppRegion>
         <functionPricingTier>B1</functionPricingTier>
-        <functionResourceGroup>scc23rgeastus51162</functionResourceGroup-->
+        <functionResourceGroup>scc23rgeastus51162</functionResourceGroup>
      </properties>
 
     <dependencies>

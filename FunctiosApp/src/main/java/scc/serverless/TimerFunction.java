@@ -15,6 +15,7 @@ import scc.Data.DTO.Status;
 import scc.Database.CosmosAuctionDBLayer;
 import scc.Database.CosmosBidDBLayer;
 
+
 import java.util.Date;
 
 public class TimerFunction {

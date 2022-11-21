@@ -1,5 +1,6 @@
 package scc.Data.DAO;
 
+
 import scc.Data.DTO.Auction;
 import scc.Data.DTO.Status;
 

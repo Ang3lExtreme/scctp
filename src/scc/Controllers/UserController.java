@@ -67,7 +67,7 @@ public class UserController {
     public User writeUser(User user) throws NoSuchAlgorithmException, JsonProcessingException {
         initCache();
         String userk = "user:" + user.getId();
-
+        String pass = user.getPwd();
         if(USE_CACHE && jedis.exists(userk))
             throw new WebApplicationException("User already exists", 409);
 
@@ -98,6 +98,7 @@ public class UserController {
             jedis.set(userk, mapper.writeValueAsString(user));
         }
 
+        user.setPwd(pass);
         return user;
 
     }
@@ -223,8 +224,8 @@ public class UserController {
         //put auctions in list
         List<Auction> auctionList = new ArrayList<>();
         for(AuctionDAO auction : auctions){
-            auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
-                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+           auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
+                  auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
         }
         return auctionList;
 
@@ -247,8 +248,8 @@ public class UserController {
         List<Auction> auctionList = new ArrayList<>();
         for(AuctionDAO auction : auctions){
             if(status == "OPEN" && auction.getStatus().equals("OPEN")){
-                auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
-                        auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
+              auctionList.add(new Auction(auction.getId(), auction.getTitle(), auction.getDescription(),
+                     auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus()));
             }
         }
         return auctionList;
@@ -276,8 +277,8 @@ public class UserController {
             //get auction of bid
             CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(bid.getAuctionId());
             if(auction.iterator().hasNext()){
-                auctionList.add(new Auction(auction.iterator().next().getId(), auction.iterator().next().getTitle(), auction.iterator().next().getDescription(),
-                        auction.iterator().next().getImageId(), auction.iterator().next().getOwnerId(), auction.iterator().next().getEndTime(), auction.iterator().next().getMinPrice(), auction.iterator().next().getWinnerId(), auction.iterator().next().getStatus()));
+               auctionList.add(new Auction(auction.iterator().next().getId(), auction.iterator().next().getTitle(), auction.iterator().next().getDescription(),
+                       auction.iterator().next().getImageId(), auction.iterator().next().getOwnerId(), auction.iterator().next().getEndTime(), auction.iterator().next().getMinPrice(), auction.iterator().next().getWinnerId(), auction.iterator().next().getStatus()));
             }
         }
         return auctionList;

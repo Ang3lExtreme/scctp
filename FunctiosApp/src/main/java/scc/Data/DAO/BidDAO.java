@@ -1,5 +1,6 @@
 package scc.Data.DAO;
 
+
 import scc.Data.DTO.Bid;
 
 public class BidDAO {

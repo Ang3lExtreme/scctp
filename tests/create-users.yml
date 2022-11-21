@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc23appnortheurope4204.azurewebsites.net/rest'
+  target: 'https://scc23appwesteurope51162.azurewebsites.net/rest'
   http:
     timeout: 30
   plugins:
@@ -38,7 +38,18 @@ scenarios:
             json:
               id: "{{ id }}"
               name: "{{ name }}"
+              nickname: "{{ nickname }}"
               pwd: "{{ pwd }}"
               photoId: "{{ imageId }}"
+            capture: 
+              - json: $.id
+                as: "userId"
             afterResponse: "genNewUserReply"    # capture result and store in file
         count: "{{ numUsers }}"
+        -get:
+            url: "/user/{{ userId }}"
+            name: "GET:/user/*"
+            headers:
+              Accept: application/json
+       
+

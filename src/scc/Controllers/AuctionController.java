@@ -56,7 +56,7 @@ public class AuctionController {
         initCache();
         //create a AuctionDAO object
         AuctionDAO au = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
-                auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice());
+                auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice());
 
         //if time is past, return null
         if(au.getEndTime().before(new Date())){
@@ -90,7 +90,7 @@ public class AuctionController {
 
         if(USE_CACHE) {
             ObjectMapper mapper = new ObjectMapper();
-            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(auction));
+            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(au));
         }
 
         return auction;
@@ -124,7 +124,7 @@ public class AuctionController {
         }
 
         AuctionDAO newau = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
-                auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus());
+                auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus());
 
         Session s = new Session();
         String res = s.checkCookieUser(session, auc.getOwnerId());
@@ -136,7 +136,7 @@ public class AuctionController {
 
         if(USE_CACHE) {
             ObjectMapper mapper = new ObjectMapper();
-            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(auction));
+            jedis.set("auc:" + auction.getAuctionId(), mapper.writeValueAsString(newau));
         }
 
         return auction;
@@ -174,6 +174,20 @@ public class AuctionController {
 
 
     }
+
+   /* @GET()
+    @Path("/get")
+    @Produces(MediaType.APPLICATION_JSON)
+    public AuctionDAO getAuction() throws JsonProcessingException {
+        initCache();
+        String get = jedis.get("auc:" + "11");
+        ObjectMapper mapper = new ObjectMapper();
+        AuctionDAO auction = mapper.readValue(get, AuctionDAO.class);
+        AuctionDAO au = new AuctionDAO(auction.getId(), auction.getTitle(), auction.getDescription(),
+                auction.getImageId(), auction.getOwnerId(), auction.getEndTime(), auction.getMinPrice());
+
+        return auction;
+    }*/
 
 
     private void verifyAuction(AuctionDAO auctionToEdit, Auction edit){

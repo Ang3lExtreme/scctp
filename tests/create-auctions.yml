@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc23appnortheurope4204.azurewebsites.net/rest'
+  target: 'https://scc23appwesteurope51162.azurewebsites.net/rest'
   http:
     timeout: 10
   plugins:
@@ -47,18 +47,18 @@ scenarios:
               Content-Type: application/json
               Accept: application/json
             json:
-              description: "{{ description }}"
+              id: "{{ id }}"
               title: "{{ title }}"
-              owner: "{{ user }}"
+              description: "{{ description }}"
               imageId: "{{ imageId }}"
+              ownerId: "{{ ownerId }}"
               endTime: "{{ endTime }}"
-              minimumPrice: "{{ minimumPrice }}"
-              status: "{{ status }}"
+              minPrice: "{{ minPrice }}"
             capture:                     # Capturing auction id and store it in variable auctionId
               - json: $.id
                 as: "auctionId"
-              - json: $.owner
-                as: "auctionUser"
+              - json: $.ownerId
+                as: "ownerId"
         - loop:                          # Let's add numBids bids to the auction
           - function: "selectUserSkewed"
           - function: "genNewBid"
@@ -77,9 +77,11 @@ scenarios:
                 Content-Type: application/json
                 Accept: application/json
               json:
+                id: "{{ id }}"
                 auctionId: "{{ auctionId }}"
-                user: "{{ user }}"
-                value: "{{ value }}"
+                userId: "{{ userId }}"
+                time : "{{ time }}"
+                value : "{{ value }}"
           count: "{{ numBids }}"   
         - loop:                          # Let's add numQuestions questions to the auction
           - function: "selectUserSkewed"
@@ -99,9 +101,10 @@ scenarios:
                 Content-Type: application/json
                 Accept: application/json
               json:
+                id: "{{ id }}"
                 auctionId: "{{ auctionId }}"
-                user: "{{ user }}"
-                text: "{{ text }}"
+                userId: "{{ userId }}"
+                message: "{{ message }}"
               capture:                     # Capturing question id and store it in variable questionId
                 - json: $.id
                   as: "questionId"

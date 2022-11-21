@@ -140,9 +140,8 @@ public class QuestionController {
         } else {
             String get = jedis.get("auc:" + id);
             ObjectMapper mapper = new ObjectMapper();
-            Auction auction = mapper.readValue(get, Auction.class);
-            auctionDAO = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
-                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus());
+            auctionDAO = mapper.readValue(get, AuctionDAO.class);
+
         }
 
         Session s = new Session();

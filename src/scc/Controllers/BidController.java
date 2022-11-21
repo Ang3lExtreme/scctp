@@ -75,7 +75,7 @@ public class BidController {
         if(!"ok".equals(res))
             throw new WebApplicationException(res, Response.Status.UNAUTHORIZED);
 
-        if(!(USE_CACHE && jedis.exists("auc:" + id))) {
+        if(true) {   //!(USE_CACHE && jedis.exists("auc:" + id))
             //id auction dont exist
             CosmosPagedIterable<AuctionDAO> auction = cosmosAuction.getAuctionById(id);
             if (!auction.iterator().hasNext()) {
@@ -84,12 +84,12 @@ public class BidController {
             auctionDAO = auction.iterator().next();
 
 
+
         } else {
             String get = jedis.get("auc:" + id);
             ObjectMapper mapper = new ObjectMapper();
-            Auction auction = mapper.readValue(get, Auction.class);
-            auctionDAO = new AuctionDAO(auction.getAuctionId(), auction.getTitle(), auction.getDescription(),
-                    auction.getImageId(), auction.getOwnerId(), auction.getEndTime().toString(), auction.getMinPrice(), auction.getWinnerId(), auction.getStatus());
+            auctionDAO = mapper.readValue(get, AuctionDAO.class);
+
         }
 
         if(!(USE_CACHE && jedis.exists("user:" + b.getUserId()))) {
@@ -101,8 +101,8 @@ public class BidController {
         }
 
         //make AuctionDAO to AuctionDTO
-        Auction auctionDTO = new Auction(auctionDAO.getId(), auctionDAO.getTitle(), auctionDAO.getDescription(),
-                auctionDAO.getImageId(), auctionDAO.getOwnerId(), auctionDAO.getEndTime(), auctionDAO.getMinPrice());
+       Auction auctionDTO = new Auction(auctionDAO.getId(), auctionDAO.getTitle(), auctionDAO.getDescription(),
+               auctionDAO.getImageId(), auctionDAO.getOwnerId(), auctionDAO.getEndTime(), auctionDAO.getMinPrice(),"",auctionDAO.getStatus());
 
         if(!(USE_CACHE && jedis.exists("bid:" + bid.getId()))) {
             //if bid exists, return error

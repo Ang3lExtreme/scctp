@@ -1,0 +1,17 @@
+YAMLException: bad indentation of a mapping entry at line 105, column 17:
+                    auctionId: "{{ auctionId }}"
+                    ^
+    at generateError (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:167:10)
+    at throwError (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:173:9)
+    at readBlockMapping (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:1107:7)
+    at composeNode (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:1359:12)
+    at readBlockMapping (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:1089:11)
+    at composeNode (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:1359:12)
+    at readBlockSequence (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:955:5)
+    at composeNode (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:1390:45)
+    at readBlockMapping (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:1089:11)
+    at composeNode (/usr/local/lib/node_modules/artillery/node_modules/js-yaml/lib/js-yaml/loader.js:1359:12)
+undefined
+bad indentation of a mapping entry at line 105, column 17:
+                    auctionId: "{{ auctionId }}"
+                    ^
