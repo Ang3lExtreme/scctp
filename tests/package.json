@@ -1,0 +1,17 @@
+{
+  "name": "trab-test",
+  "version": "1.0.0",
+  "description": "**** Intro These scripts are given to help students tests their project. It is not mandatory to use these scripts.",
+  "main": "test-utils.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^5.5.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0"
+  }
+}

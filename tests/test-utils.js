@@ -21,7 +21,7 @@ module.exports = {
 }
 
 
-const Faker = require('faker/locale/en_US')
+const Faker = require('faker/locale/en_GB')
 const fs = require('fs')
 const path = require('path')
 
@@ -123,6 +123,7 @@ function genNewUser(context, events, done) {
 	const last = `${Faker.name.lastName()}`
 	context.vars.id = first + "." + last
 	context.vars.name = first + " " + last
+	context.vars.nickname = first + " " + last
 	context.vars.pwd = `${Faker.internet.password()}`
 	return done()
 }
@@ -179,16 +180,18 @@ function selectUserSkewed(context, events, done) {
  * bidValue - price for the next bid
  */
 function genNewAuction(context, events, done) {
+	context.vars.id = `${Faker.random.uuid()}`;
 	context.vars.title = `${Faker.commerce.productName()}`
 	context.vars.description = `${Faker.commerce.productDescription()}`
-	context.vars.minimumPrice = `${Faker.commerce.price()}`
-	context.vars.bidValue = context.vars.minimumPrice + random(3)
-	var maxBids = 5
-	if( typeof context.vars.maxBids !== 'undefined')
-		maxBids = context.vars.maxBids;
-	var maxQuestions = 2
-	if( typeof context.vars.maxQuestions !== 'undefined')
-		maxQuestions = context.vars.maxQuestions;
+	context.vars.minPrice = `${Faker.commerce.price()}`
+	//context.vars.bidValue = context.vars.minPrice + random(3)
+	//var maxBids = 5
+	//if( typeof context.vars.maxBids !== 'undefined')
+	//	maxBids = context.vars.maxBids;
+	//var maxQuestions = 2
+	//if( typeof context.vars.maxQuestions !== 'undefined')
+	//	maxQuestions = context.vars.maxQuestions;
+	
 	var d = new Date();
 	d.setTime(Date.now() + random( 300000));
 	context.vars.endTime = d.toISOString();

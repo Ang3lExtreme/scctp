@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc23appnortheurope4204.azurewebsites.net/rest'
+  target: 'https://scc23appwesteurope51162.azurewebsites.net/rest'
   http:
     timeout: 10
   plugins:
@@ -38,7 +38,7 @@ scenarios:
           headers:
             Accept: application/json
       - get:                          # Get user auctions
-          url: "/user/{{ user }}/auctions?status=\"OPEN\""
+          url: "/user/{{ user }}/auctionsopen?status=\"OPEN\""
           name: "GET:/user/*/auctions"
           headers:
             Accept: application/json
@@ -99,7 +99,7 @@ scenarios:
           headers:
             Accept: application/json
       - get:                          # Get following auctions
-          url: "/user/{{ user }}/following"
+          url: "/user/{{ user }}/auctions/following"
           name: "GET:/user/*/following"
           headers:
             Accept: application/json
@@ -113,7 +113,7 @@ scenarios:
             headers:
               Accept: application/octet-stream
         - get:
-            url: "/auction/{{ $loopElement.id }}/bid?st=0&len=1"   #get just top bid
+            url: "/auction/{{ $loopElement.id }}/bid"   #get just top bid
             name: "GET:/auction/*/bid"
             headers: 
               Accept: application/json
@@ -192,7 +192,7 @@ scenarios:
               as: "auctionsLst"
             ifTrue: "nextAction == 1"
         - get:                          # Get user auctions
-            url: "/user/{{ user2 }}/auctions?status=\"OPEN\""
+            url: "/user/{{ user2 }}/auctionsopen?status=\"OPEN\""
             name: "GET:/user/*/auctions"
             headers:
               Accept: application/json
@@ -218,13 +218,13 @@ scenarios:
               Content-Type: application/json
               Accept: application/json
             json:
-              description: "{{ description }}"
+              id: "{{ id }}"
               title: "{{ title }}"
-              owner: "{{ user }}"
+              description: "{{ description }}"
               imageId: "{{ imageId }}"
+              ownerId: "{{ ownerId }}"
               endTime: "{{ endTime }}"
-              minimumPrice: "{{ minimumPrice }}"
-              status: "{{ status }}"
+              minPrice: "{{ minPrice }}"
             ifTrue: "nextAction == 3"
         - get:                          # Call methods for displaying auction: image, top bid, messages
             url: "/media/{{ imageId }}"
@@ -269,8 +269,9 @@ scenarios:
               Content-Type: application/json
               Accept: application/json
             json:
-              auctionId: "{{ auctionId }}"
-              user: "{{ user }}"
-              text: "{{ text }}"
+              	id: "{{ id }}"
+                auctionId: "{{ auctionId }}"
+                userId: "{{ userId }}"
+                message: "{{ message }}"
             ifTrue: "nextAction == 6"
         whileTrue: "random80"
