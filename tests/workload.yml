@@ -1,0 +1,144 @@
+config:
+  target: 'https://scc23appwesteurope51162.azurewebsites.net/rest'
+  http:
+    timeout: 60
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true  # new mode to aggregate metrics in artillery
+  processor: "./test-utils.js"
+  variables:
+    numUsers : 50
+    numAuctions : 50
+    numBids : 10
+    numQuestions : 10
+  phases:
+  - name: "bid and questions"    # Create users
+    duration: 1
+    arrivalCount: 1
+  
+scenarios:
+  - name: 'Bids and questions'
+    weight: 1
+    flow:
+      - loop:
+        - function: "selectUserSkewed"
+        - post:
+            url: "/user/auth"
+            name: "POST:/user/auth"
+            headers:
+              Content-Type: application/json
+            json:
+              user: "{{ nickname }}"
+              pwd: "{{ pwd }}"
+        - loop:
+          - function: "genNewBid"
+          - function: "selectAuctionFromData"
+          - post:
+              url: "/auction/{{ auctionId }}/bid"
+              name: "POST:/auction/{{ auctionId }}/bid"
+              headers:
+                Content-Type: application/json
+              json:
+                id: "{{ bidId }}"
+                auctionId: "{{ auctionId }}"
+                userId: "{{ userid }}"
+                time: "{{ time }}"
+                value: "{{ value }}"
+          count: "{{ numBids }}"
+        count: "{{ numUsers }}" #max 40 bids per user
+      - loop:
+        - function: "selectUserSkewed"
+        - function: "genNewQuestion"
+        - function: "selectAuctionFromData"
+        - post:
+            url: "/user/auth"
+            name: "POST:/user/auth"
+            headers:
+              Content-Type: application/json
+            json:
+              user: "{{ nickname }}"
+              pwd: "{{ pwd }}"
+        - post:
+            url: "/auction/{{ auctionId }}/question"
+            name: "POST:/auction/{{ auctionId }}/question"
+            headers:
+              Content-Type: application/json
+            json:
+              id: "{{ questionId }}"
+              auctionId: "{{ auctionId }}"
+              userId: "{{ userid }}"
+              message: "{{ message }}"
+        - post:
+            url: "/user/auth"
+            name: "POST:/user/auth"
+            headers:
+              Content-Type: application/json
+            json:
+              user: "{{ userToReply }}"
+              pwd: "{{ pwdUserToReply }}"
+        - log: "Replying to question {{ questionId }} from user {{ userToReply }} and auction {{ auctionId }}, user {{userToReply}} pwd {{pwdUserToReply}}"
+        - function: "genReply"
+        - post:
+            url: "/auction/{{ auctionId }}/question/{{ questionId }}/reply"
+            name: "POST:/auction/{{auctionId}}/question/{{questionId}}/reply"
+            headers:
+              Content-Type: application/json
+            json:
+              reply: "{{ reply }}"        
+        count: "{{ numQuestions }}" #max 10 questions per user
+      - loop:
+        - function: "selectUserSkewed"
+        - post:
+            url: "/user/auth"
+            name: "POST:/user/auth"
+            headers:
+              Content-Type: application/json
+            json:
+              user: "{{ nickname }}"
+              pwd: "{{ pwd }}"
+        - get:
+            url: "/user/{{ userid }}/auctions"
+            name: "GET:/user/{{ userid }}/auctions"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+        - get:
+            url: "/user/{{ userid }}/auctionsopen?status=\"OPEN\""
+            name: "GET:/user/{{ userid }}/auctionsopen"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+        - get:
+            url: "/user/{{ userid }}/auctions/following"
+            name: "GET:/user/{{ userid }}/auctions/following"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+        - get:
+            url: "/auction/auctionsToClose"
+            name: "GET:/auction/auctionsToClose"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+        count: "{{ numUsers }}" #max 10 questions per user
+      - loop:
+        - function: "selectAuctionFromData"
+        - get:
+            url: "/auction/{{ auctionId }}/bid/"
+            name: "GET:/auction/{{ auctionId }}/bid/"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+        count: "{{ numAuctions }}" #max 10 questions per user
+        
+        
+        
+        
+        
+            
+
+
+      
+
+
+      

@@ -1,0 +1,41 @@
+config:
+  target: 'https://scc23appwesteurope51162.azurewebsites.net/rest'
+  http:
+    timeout: 30
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true  # new mode to aggregate metrics in artillery
+  processor: "./test-images.js"
+  variables:
+  phases:
+  - name: "Test Images"    # WARM UP PHASE: duration: 30s, starting with 1 new client/sec up to 5 new clients/sec
+    duration: 20
+    arrivalRate: 1
+    maxVusers: 5
+
+scenarios:
+  - name: 'Upload images'
+    weight: 1
+    flow:
+      - loop:                            # let's create 100 users - loop ... count
+        - post:                          # First: post image for the user
+            url: "/media"
+            name: "POST:/media"
+            headers:
+              Content-Type: application/octet-stream
+              Accept: application/json
+            beforeRequest: "uploadImageBody"
+            afterResponse: "processUploadReply"
+  
+  - name: 'Download images'
+    weight: 5
+    flow:
+      - function: "selectImageToDownload"
+      - get:
+          url: "/media/{{ imageId }}"
+          name: "GET:/media/{{ imageId }}"
+          headers:
+            Accept: application/octet-stream
+          ifTrue: "imageId"
+       
+

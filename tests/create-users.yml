@@ -7,7 +7,7 @@ config:
       useOnlyRequestNames: true  # new mode to aggregate metrics in artillery
   processor: "./test-utils.js"
   variables:
-    numUsers : 100
+    numUsers : 50
   phases:
   - name: "Create users"    # Create users
     duration: 1
@@ -42,14 +42,44 @@ scenarios:
               pwd: "{{ pwd }}"
               photoId: "{{ imageId }}"
             capture: 
-              - json: $.id
+              - json: $.auctionId
                 as: "userId"
             afterResponse: "genNewUserReply"    # capture result and store in file
         count: "{{ numUsers }}"
-        -get:
-            url: "/user/{{ userId }}"
-            name: "GET:/user/*"
-            headers:
-              Accept: application/json
        
+        
 
+
+
+
+
+        - post:                          # First: post image for the user
+            url: "/media"
+            name: "POST:/media"
+            headers:
+              Content-Type: application/octet-stream
+              Accept: application/json
+            beforeRequest: "uploadImageBody"
+            capture: 
+              regexp: "(.+)"
+              as: "imageId"              # capture the reply as image id to be used in user creation
+        - function: "genNewAuction"             # capture the reply as image id to be used in uction creation
+        - post:                          # Create auction
+            url: "/auction"
+            name: "POST:/auction"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+            json:
+              id: "{{ id }}"
+              title: "{{ title }}"
+              description: "{{ description }}"
+              imageId: "{{ imageId }}"
+              ownerId: "{{ userid }}"
+              endTime: "{{ endTime }}"
+              minPrice: "{{ minPrice }}"
+            capture:                     # Capturing auction id and store it in variable auctionId
+              - json: $.id
+                as: "auctionId"
+              - json: $.ownerId
+                as: "ownerId"

@@ -84,7 +84,7 @@ public class QuestionController {
 
         if(!(USE_CACHE && jedis.exists("quest:" + question.getId()))) {
             //if question already exists throw error
-            CosmosPagedIterable<QuestionsDAO> questions = cosmos.getQuestionById(question.getUserId(), question.getAuctionId(), question.getId());
+            CosmosPagedIterable<QuestionsDAO> questions = cosmos.getQuestionById(question.getAuctionId(), question.getId());
             if (questions.iterator().hasNext()) {
                 throw new WebApplicationException("Question already exists", 409);
             }
@@ -151,7 +151,7 @@ public class QuestionController {
 
         if(!(USE_CACHE && jedis.exists("quest:" + questionId))) {
             //if question does not exist return 404
-            CosmosPagedIterable<QuestionsDAO> question = cosmos.getQuestionById(auctionDAO.getOwnerId(), id, questionId);
+            CosmosPagedIterable<QuestionsDAO> question = cosmos.getQuestionById(id, questionId);
             if (!question.iterator().hasNext()) {
                 throw new WebApplicationException("Question does not exist", 404);
             }
